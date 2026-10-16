@@ -22,8 +22,8 @@ import net.minecraftforge.fml.common.Mod;
 public final class FogHandler {
 
     // color de la niebla de dia / de noche (RGB 0..1)
-    private static final float[] DAY_COLOR = {0.62F, 0.57F, 0.34F};
-    private static final float[] NIGHT_COLOR = {0.045F, 0.045F, 0.035F};
+    private static final float[] DAY_COLOR = {0.75F, 0.85F, 1.0F};   // el azul palido de los primeros Minecraft
+    private static final float[] NIGHT_COLOR = {0.03F, 0.035F, 0.05F};
 
     @SubscribeEvent
     public static void onRenderFog(ViewportEvent.RenderFog event) {

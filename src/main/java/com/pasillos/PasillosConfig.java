@@ -19,7 +19,7 @@ public final class PasillosConfig {
         ForgeConfigSpec.Builder common = new ForgeConfigSpec.Builder();
         common.push("sueno");
         SLEEP_CHANCE = common
-                .comment("Probabilidad (0.0 a 1.0) de que al dormir en una cama del Overworld despiertes en los Pasillos.")
+                .comment("Probabilidad (0.0 a 1.0) de que al dormir en una cama del Overworld despiertes en el mundo olvidado.")
                 .defineInRange("probabilidad_al_dormir", 0.5D, 0.0D, 1.0D);
         SLEEP_DELAY_TICKS = common
                 .comment("Ticks que debes llevar dormido antes de que ocurra el cambio (20 ticks = 1 segundo, maximo 99).")
@@ -30,10 +30,10 @@ public final class PasillosConfig {
         ForgeConfigSpec.Builder client = new ForgeConfigSpec.Builder();
         client.push("niebla");
         DAY_FOG_DISTANCE = client
-                .comment("Distancia de visibilidad (en bloques) de dia dentro de los Pasillos.")
-                .defineInRange("distancia_dia", 40.0D, 4.0D, 256.0D);
+                .comment("Distancia de visibilidad (en bloques) de dia dentro de la dimension.")
+                .defineInRange("distancia_dia", 70.0D, 4.0D, 256.0D);
         NIGHT_FOG_DISTANCE = client
-                .comment("Distancia de visibilidad (en bloques) de noche dentro de los Pasillos. Menos = mas niebla.")
+                .comment("Distancia de visibilidad (en bloques) de noche dentro de la dimension. Menos = mas niebla.")
                 .defineInRange("distancia_noche", 6.0D, 2.0D, 64.0D);
         client.pop();
         CLIENT_SPEC = client.build();

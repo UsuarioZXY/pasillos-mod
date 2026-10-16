@@ -1,7 +1,6 @@
 package com.pasillos;
 
 import com.pasillos.registry.ModDimensions;
-import com.pasillos.worldgen.LiminalChunkGenerator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +14,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 /** Logica de viaje entre el mundo normal y los Pasillos. */
 public final class DreamTravel {
@@ -48,12 +50,32 @@ public final class DreamTravel {
             player.stopSleepInBed(true, true);
         }
 
-        BlockPos spawn = LiminalChunkGenerator.safeSpawnNear(player.getBlockX(), player.getBlockZ());
-        target.getChunkAt(spawn); // fuerza a generar el chunk antes de aparecer para no caer al vacio
+        BlockPos spawn = findSurface(target, player.getBlockX(), player.getBlockZ());
         player.teleportTo(target, spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, player.getYRot(), 0.0F);
 
         player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 100, 0, false, false));
         player.displayClientMessage(Component.translatable("message.pasillos.arrive"), true);
+    }
+
+    /** Busca suelo firme de hierba o arena cerca de unas coordenadas, generando los chunks necesarios. */
+    private static BlockPos findSurface(ServerLevel level, int x, int z) {
+        for (int r = 0; r <= 24; r += 2) {
+            int points = r == 0 ? 1 : 8;
+            for (int i = 0; i < points; i++) {
+                double angle = i * Math.PI / 4.0D;
+                int px = x + (int) Math.round(Math.cos(angle) * r);
+                int pz = z + (int) Math.round(Math.sin(angle) * r);
+                level.getChunk(px >> 4, pz >> 4); // fuerza a generar el chunk antes de aparecer
+                int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, px, pz);
+                BlockPos feet = new BlockPos(px, y, pz);
+                BlockState below = level.getBlockState(feet.below());
+                if ((below.is(Blocks.GRASS_BLOCK) || below.is(Blocks.SAND))
+                        && level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir()) {
+                    return feet;
+                }
+            }
+        }
+        return new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) + 1, z);
     }
 
     /** Devuelve al jugador al sitio donde se durmio (o al spawn del mundo si no se sabe). */

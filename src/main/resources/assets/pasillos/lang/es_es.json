@@ -1,12 +1,8 @@
 {
-  "block.pasillos.wallpaper": "Papel tapiz amarillo",
-  "block.pasillos.wallpaper_stained": "Papel tapiz manchado",
-  "block.pasillos.carpet": "Moqueta húmeda",
-  "block.pasillos.ceiling_tile": "Placa de techo",
-  "block.pasillos.fluorescent_light": "Panel fluorescente",
-  "message.pasillos.arrive": "Despiertas. Esa no es tu cama.",
+  "entity.pasillos.asechador": "Asechador",
+  "item.pasillos.asechador_spawn_egg": "Huevo generador de Asechador",
+  "message.pasillos.arrive": "Despiertas. Esa no es tu cama. Todo esta demasiado quieto.",
   "message.pasillos.leave": "Abres los ojos. Todo parece normal. Casi.",
   "message.pasillos.no_dimension": "La dimensión no está disponible.",
-  "message.pasillos.not_inside": "No estás en los Pasillos.",
-  "itemGroup.pasillos": "Pasillos Liminales"
+  "message.pasillos.not_inside": "No estás en el mundo olvidado."
 }

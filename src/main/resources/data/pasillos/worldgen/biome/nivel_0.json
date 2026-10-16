@@ -1,12 +1,12 @@
 {
   "has_precipitation": false,
   "temperature": 0.8,
-  "downfall": 0.0,
+  "downfall": 0.4,
   "effects": {
-    "fog_color": 10392150,
-    "sky_color": 7893062,
-    "water_color": 4159076,
-    "water_fog_color": 332815,
+    "fog_color": 12638463,
+    "sky_color": 8103167,
+    "water_color": 4159204,
+    "water_fog_color": 329011,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
       "tick_delay": 6000,
@@ -15,7 +15,14 @@
     }
   },
   "spawners": {
-    "monster": [],
+    "monster": [
+      {
+        "type": "pasillos:asechador",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ],
     "creature": [],
     "ambient": [],
     "axolotls": [],

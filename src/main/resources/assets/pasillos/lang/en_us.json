@@ -1,12 +1,8 @@
 {
-  "block.pasillos.wallpaper": "Yellow Wallpaper",
-  "block.pasillos.wallpaper_stained": "Stained Wallpaper",
-  "block.pasillos.carpet": "Damp Carpet",
-  "block.pasillos.ceiling_tile": "Ceiling Tile",
-  "block.pasillos.fluorescent_light": "Fluorescent Panel",
-  "message.pasillos.arrive": "You wake up. That is not your bed.",
+  "entity.pasillos.asechador": "Stalker",
+  "item.pasillos.asechador_spawn_egg": "Stalker Spawn Egg",
+  "message.pasillos.arrive": "You wake up. That is not your bed. Everything is too quiet.",
   "message.pasillos.leave": "You open your eyes. Everything looks normal. Almost.",
   "message.pasillos.no_dimension": "The dimension is not available.",
-  "message.pasillos.not_inside": "You are not in the Halls.",
-  "itemGroup.pasillos": "Liminal Halls"
+  "message.pasillos.not_inside": "You are not in the forgotten world."
 }
