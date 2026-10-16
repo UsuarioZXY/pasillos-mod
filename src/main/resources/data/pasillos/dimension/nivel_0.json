@@ -1,0 +1,11 @@
+{
+  "type": "pasillos:nivel_0",
+  "generator": {
+    "type": "pasillos:liminal",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "pasillos:nivel_0"
+    },
+    "level": 0
+  }
+}
