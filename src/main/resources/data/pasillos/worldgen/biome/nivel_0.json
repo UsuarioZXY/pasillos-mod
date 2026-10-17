@@ -15,14 +15,7 @@
     }
   },
   "spawners": {
-    "monster": [
-      {
-        "type": "pasillos:asechador",
-        "weight": 1,
-        "minCount": 1,
-        "maxCount": 1
-      }
-    ],
+    "monster": [],
     "creature": [],
     "ambient": [],
     "axolotls": [],

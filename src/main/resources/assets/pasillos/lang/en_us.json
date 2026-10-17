@@ -5,5 +5,6 @@
   "message.pasillos.leave": "You open your eyes. Everything looks normal. Almost.",
   "message.pasillos.no_dimension": "The dimension is not available.",
   "message.pasillos.not_inside": "You are not in the forgotten world.",
-  "item.pasillos.flashlight": "Flashlight"
+  "hud.pasillos.sanity": "Sanity",
+  "hud.pasillos.anxiety": "Anxiety"
 }

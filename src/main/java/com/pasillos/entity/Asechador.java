@@ -1,14 +1,22 @@
 package com.pasillos.entity;
 
+import com.pasillos.event.AsechadorDirector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -18,10 +26,22 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
 
 /**
- * El Asechador: una silueta oscura que nunca ataca. Se esconde detras de arboles y relieve, te mira
- * desde lejos y desaparece si lo miras demasiado o si intentas golpearlo.
+ * El Asechador: una silueta altisima que nunca ataca. Se esconde de varias maneras, te observa desde
+ * lejos y desaparece si lo miras demasiado, si te acercas o si intentas golpearlo. Vuelve a aparecer
+ * mas tarde en otro sitio (lo gestiona AsechadorDirector).
  */
 public class Asechador extends PathfinderMob {
+
+    /** De pie, vigilando. */
+    public static final int STATE_WATCH = 0;
+    /** Asomandose por el lateral de su cobertura. */
+    public static final int STATE_PEEK = 1;
+    /** Agazapado, mucho mas bajo. */
+    public static final int STATE_CROUCH = 2;
+
+    private static final EntityDataAccessor<Integer> STATE =
+            SynchedEntityData.defineId(Asechador.class, EntityDataSerializers.INT);
+    private static final EntityDimensions CROUCH_SIZE = EntityDimensions.scalable(0.9F, 1.9F);
 
     public Asechador(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -32,7 +52,7 @@ public class Asechador extends PathfinderMob {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.3D)
-                .add(Attributes.FOLLOW_RANGE, 48.0D);
+                .add(Attributes.FOLLOW_RANGE, 64.0D);
     }
 
     @Override
@@ -41,20 +61,93 @@ public class Asechador extends PathfinderMob {
         this.goalSelector.addGoal(1, new HideAndWatchGoal(this));
     }
 
-    /** Solo aparece de noche y como mucho uno por zona. */
-    public static boolean canSpawn(EntityType<Asechador> type, ServerLevelAccessor level, MobSpawnType reason,
-                                   BlockPos pos, RandomSource random) {
-        if (!level.getLevel().isNight()) {
-            return false;
-        }
-        return level.getEntitiesOfClass(Asechador.class, new AABB(pos).inflate(96.0D)).isEmpty();
+    // ------------------------------------------------------------------------------------------
+    // Estado sincronizado (lo usan el modelo y la IA)
+    // ------------------------------------------------------------------------------------------
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(STATE, STATE_WATCH);
     }
 
-    /** Se desvanece en humo. */
+    public int getState() {
+        return this.entityData.get(STATE);
+    }
+
+    public void setState(int state) {
+        if (this.getState() != state) {
+            this.entityData.set(STATE, state);
+        }
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (STATE.equals(key)) {
+            this.refreshDimensions();
+        }
+    }
+
+    @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        return this.getState() == STATE_CROUCH ? CROUCH_SIZE : super.getDimensions(pose);
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // Vida
+    // ------------------------------------------------------------------------------------------
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (this.level().isClientSide) {
+            this.spawnAmbientParticles();
+        } else if (this.tickCount % 20 == 0 && this.level().isDay()) {
+            this.vanish(); // con la luz del dia se disuelve
+        }
+    }
+
+    /** Ceniza que cae de su cuerpo, gotas de tinta negra y almas cuando se asoma. */
+    private void spawnAmbientParticles() {
+        RandomSource random = this.random;
+        double height = this.getBbHeight();
+        if (random.nextInt(3) == 0) {
+            this.level().addParticle(ParticleTypes.ASH,
+                    this.getX() + (random.nextDouble() - 0.5D) * 1.3D,
+                    this.getY() + random.nextDouble() * height,
+                    this.getZ() + (random.nextDouble() - 0.5D) * 1.3D,
+                    0.0D, -0.02D, 0.0D);
+        }
+        if (random.nextInt(7) == 0) {
+            this.level().addParticle(ParticleTypes.SQUID_INK,
+                    this.getX() + (random.nextDouble() - 0.5D) * 0.6D,
+                    this.getY() + height * 0.9D,
+                    this.getZ() + (random.nextDouble() - 0.5D) * 0.6D,
+                    0.0D, -0.03D, 0.0D);
+        }
+        if (this.getState() == STATE_PEEK && random.nextInt(4) == 0) {
+            this.level().addParticle(ParticleTypes.SCULK_SOUL,
+                    this.getX() + (random.nextDouble() - 0.5D) * 0.8D,
+                    this.getY() + height * 0.85D,
+                    this.getZ() + (random.nextDouble() - 0.5D) * 0.8D,
+                    0.0D, 0.02D, 0.0D);
+        }
+    }
+
+    /** Se desvanece en humo y tinta. Mas tarde el director lo hara aparecer en otro lugar. */
     public void vanish() {
         if (this.level() instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY() + 1.0D, this.getZ(),
-                    16, 0.3D, 0.7D, 0.3D, 0.01D);
+            double mid = this.getY() + this.getBbHeight() * 0.5D;
+            serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), mid, this.getZ(),
+                    40, 0.5D, this.getBbHeight() * 0.35D, 0.5D, 0.02D);
+            serverLevel.sendParticles(ParticleTypes.SQUID_INK, this.getX(), mid, this.getZ(),
+                    25, 0.4D, this.getBbHeight() * 0.3D, 0.4D, 0.05D);
+            serverLevel.sendParticles(ParticleTypes.SCULK_SOUL, this.getX(), mid, this.getZ(),
+                    12, 0.4D, this.getBbHeight() * 0.3D, 0.4D, 0.04D);
+            serverLevel.playSound(null, this.getX(), this.getY(), this.getZ(),
+                    SoundEvents.ENDERMAN_TELEPORT, SoundSource.HOSTILE, 0.8F, 0.4F);
+            AsechadorDirector.scheduleRespawn(serverLevel, this.position());
         }
         this.discard();
     }
@@ -68,14 +161,21 @@ public class Asechador extends PathfinderMob {
         return super.hurt(source, amount);
     }
 
-    /** Los brazos miden casi 4 bloques de punta a punta; sin esto desaparecerian al borde de la pantalla. */
+    /** Los brazos y la cabeza ladeada sobresalen del hitbox; sin esto desapareceria al borde de la pantalla. */
     @Override
     public AABB getBoundingBoxForCulling() {
-        return this.getBoundingBox().inflate(2.0D, 0.0D, 2.0D);
+        return this.getBoundingBox().inflate(1.5D, 0.0D, 1.5D);
     }
 
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return distanceToClosestPlayer > 64.0D;
+    }
+
+    /** Solo se usa si el bioma lo lista; en esta version lo controla AsechadorDirector. */
+    public static boolean canSpawn(EntityType<Asechador> type, ServerLevelAccessor level, MobSpawnType reason,
+                                   BlockPos pos, RandomSource random) {
+        return level.getLevel().isNight()
+                && level.getEntitiesOfClass(Asechador.class, new AABB(pos).inflate(96.0D)).isEmpty();
     }
 }

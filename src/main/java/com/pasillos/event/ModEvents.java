@@ -33,9 +33,6 @@ public final class ModEvents {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(ModItems.ASECHADOR_SPAWN_EGG);
         }
-        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            event.accept(ModItems.FLASHLIGHT);
-        }
     }
 
     private ModEvents() {

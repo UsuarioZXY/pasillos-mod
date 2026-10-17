@@ -5,5 +5,6 @@
   "message.pasillos.leave": "Abres los ojos. Todo parece normal. Casi.",
   "message.pasillos.no_dimension": "La dimensión no está disponible.",
   "message.pasillos.not_inside": "No estás en el mundo olvidado.",
-  "item.pasillos.flashlight": "Linterna"
+  "hud.pasillos.sanity": "Cordura",
+  "hud.pasillos.anxiety": "Ansiedad"
 }
