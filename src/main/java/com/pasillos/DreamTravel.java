@@ -1,6 +1,8 @@
 package com.pasillos;
 
 import com.pasillos.registry.ModDimensions;
+import com.pasillos.registry.ModItems;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -55,6 +57,13 @@ public final class DreamTravel {
 
         player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 100, 0, false, false));
         player.displayClientMessage(Component.translatable("message.pasillos.arrive"), true);
+
+        // la primera vez, algo te espera en el inventario
+        CompoundTag data = player.getPersistentData();
+        if (!data.getBoolean("pasillos_flashlight")) {
+            data.putBoolean("pasillos_flashlight", true);
+            player.addItem(new ItemStack(ModItems.FLASHLIGHT.get()));
+        }
     }
 
     /** Busca suelo firme de hierba o arena cerca de unas coordenadas, generando los chunks necesarios. */

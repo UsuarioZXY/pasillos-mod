@@ -14,7 +14,7 @@ import java.util.EnumSet;
 /**
  * Comportamiento unico del Asechador:
  * - Siempre gira la cabeza hacia el jugador mas cercano.
- * - Busca un sitio desde el que el jugador no lo vea (detras de un arbol, de una colina...) a 12-26 bloques.
+ * - Busca un sitio desde el que el jugador no lo vea (detras de un arbol, de una colina...) a 14-30 bloques.
  * - Si el jugador le mira directamente se queda quieto; si lo sigue mirando, huye a otro escondite
  *   y, si aun asi lo mantiene a la vista, se desvanece.
  * - Nunca ataca.
@@ -22,8 +22,8 @@ import java.util.EnumSet;
 public class HideAndWatchGoal extends Goal {
 
     private static final double WATCH_RANGE = 48.0D;
-    private static final double MIN_DIST = 12.0D;
-    private static final double MAX_DIST = 26.0D;
+    private static final double MIN_DIST = 14.0D;
+    private static final double MAX_DIST = 30.0D;
     private static final int FREEZE_TICKS = 30;
     private static final int VANISH_TICKS = 90;
 
@@ -78,7 +78,7 @@ public class HideAndWatchGoal extends Goal {
 
         if (seen) {
             this.seenTicks++;
-            if (dist < 6.0D || this.seenTicks > VANISH_TICKS) {
+            if (dist < 8.0D || this.seenTicks > VANISH_TICKS) {
                 this.mob.vanish();
                 return;
             }
@@ -105,8 +105,20 @@ public class HideAndWatchGoal extends Goal {
             Vec3 spot = findHiddenSpot();
             if (spot != null) {
                 this.mob.getNavigation().moveTo(spot.x, spot.y, spot.z, 1.0D);
+            } else if (dist < MIN_DIST) {
+                retreat();
             }
         }
+    }
+
+    /** Sin escondite a mano, al menos se aleja del jugador. */
+    private void retreat() {
+        Vec3 away = this.mob.position().subtract(this.player.position()).multiply(1.0D, 0.0D, 1.0D);
+        if (away.lengthSqr() < 0.0001D) {
+            return;
+        }
+        Vec3 target = this.mob.position().add(away.normalize().scale(10.0D));
+        this.mob.getNavigation().moveTo(target.x, target.y, target.z, 1.0D);
     }
 
     private void flee() {
@@ -131,7 +143,7 @@ public class HideAndWatchGoal extends Goal {
         return dot > 0.97D && p.hasLineOfSight(this.mob);
     }
 
-    /** Un punto cercano al suelo desde el que el jugador no tiene linea de vision, a 12-26 bloques de el. */
+    /** Un punto cercano al suelo desde el que el jugador no tiene linea de vision, a 14-30 bloques de el. */
     private Vec3 findHiddenSpot() {
         RandomSource random = this.mob.getRandom();
         Vec3 eye = this.player.getEyePosition();
@@ -149,7 +161,7 @@ public class HideAndWatchGoal extends Goal {
             if (d < MIN_DIST || d > MAX_DIST) {
                 continue;
             }
-            Vec3 head = new Vec3(x + 0.5D, y + 1.7D, z + 0.5D);
+            Vec3 head = new Vec3(x + 0.5D, y + this.mob.getEyeHeight(), z + 0.5D);
             HitResult hit = this.mob.level().clip(new ClipContext(eye, head,
                     ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.player));
             if (hit.getType() == HitResult.Type.MISS) {

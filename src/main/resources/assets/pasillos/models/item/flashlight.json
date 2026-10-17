@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "pasillos:item/flashlight"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "pasillos:on": 1
+      },
+      "model": "pasillos:item/flashlight_on"
+    }
+  ]
+}

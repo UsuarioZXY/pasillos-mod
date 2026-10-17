@@ -4,5 +4,6 @@
   "message.pasillos.arrive": "You wake up. That is not your bed. Everything is too quiet.",
   "message.pasillos.leave": "You open your eyes. Everything looks normal. Almost.",
   "message.pasillos.no_dimension": "The dimension is not available.",
-  "message.pasillos.not_inside": "You are not in the forgotten world."
+  "message.pasillos.not_inside": "You are not in the forgotten world.",
+  "item.pasillos.flashlight": "Flashlight"
 }

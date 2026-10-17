@@ -16,7 +16,7 @@ public final class ModEntities {
 
     public static final RegistryObject<EntityType<Asechador>> ASECHADOR = ENTITIES.register("asechador",
             () -> EntityType.Builder.of(Asechador::new, MobCategory.MONSTER)
-                    .sized(0.6F, 1.95F)
+                    .sized(0.9F, 3.8F)
                     .clientTrackingRange(10)
                     .build(new ResourceLocation(PasillosMod.MODID, "asechador").toString()));
 

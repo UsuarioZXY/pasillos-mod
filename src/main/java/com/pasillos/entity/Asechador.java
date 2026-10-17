@@ -68,6 +68,12 @@ public class Asechador extends PathfinderMob {
         return super.hurt(source, amount);
     }
 
+    /** Los brazos miden casi 4 bloques de punta a punta; sin esto desaparecerian al borde de la pantalla. */
+    @Override
+    public AABB getBoundingBoxForCulling() {
+        return this.getBoundingBox().inflate(2.0D, 0.0D, 2.0D);
+    }
+
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return distanceToClosestPlayer > 64.0D;

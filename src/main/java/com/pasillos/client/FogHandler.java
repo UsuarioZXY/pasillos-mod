@@ -3,11 +3,14 @@ package com.pasillos.client;
 import com.mojang.blaze3d.shaders.FogShape;
 import com.pasillos.PasillosConfig;
 import com.pasillos.PasillosMod;
+import com.pasillos.entity.Asechador;
+import com.pasillos.item.FlashlightItem;
 import com.pasillos.registry.ModDimensions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.FogType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ViewportEvent;
@@ -44,6 +47,13 @@ public final class FogHandler {
         float far = Math.max(2.0F, Mth.lerp(night, dayFar, nightFar) + breath);
         float near = Mth.lerp(night, Math.min(8.0F, far * 0.2F), 0.0F);
 
+        // linterna encendida: abre un claro en la niebla (parpadea si el Asechador esta cerca)
+        if (night > 0.0F && FlashlightItem.holdingOn(Minecraft.getInstance().player) && !flickering(level)) {
+            float beam = Math.max(PasillosConfig.FLASHLIGHT_DISTANCE.get().floatValue(), nightFar);
+            far = Math.max(far, Mth.lerp(night, dayFar, beam));
+            near = Math.max(near, far * 0.45F * night);
+        }
+
         event.setNearPlaneDistance(near);
         event.setFarPlaneDistance(far);
         event.setFogShape(FogShape.SPHERE);
@@ -60,6 +70,21 @@ public final class FogHandler {
         event.setRed(Mth.lerp(night, DAY_COLOR[0], NIGHT_COLOR[0]));
         event.setGreen(Mth.lerp(night, DAY_COLOR[1], NIGHT_COLOR[1]));
         event.setBlue(Mth.lerp(night, DAY_COLOR[2], NIGHT_COLOR[2]));
+    }
+
+    private static long lastStalkerCheck = -100L;
+    private static boolean stalkerNear = false;
+
+    /** La luz de la linterna falla a rachas cuando hay un Asechador a menos de 40 bloques. */
+    private static boolean flickering(ClientLevel level) {
+        long time = level.getGameTime();
+        if (time - lastStalkerCheck >= 10L || time < lastStalkerCheck) {
+            lastStalkerCheck = time;
+            Player player = Minecraft.getInstance().player;
+            stalkerNear = player != null
+                    && !level.getEntitiesOfClass(Asechador.class, player.getBoundingBox().inflate(40.0D)).isEmpty();
+        }
+        return stalkerNear && (time / 3L) % 5L == 0L;
     }
 
     private static ClientLevel insideLevel() {

@@ -14,6 +14,7 @@ public final class PasillosConfig {
     // --- cliente / niebla ---
     public static final ForgeConfigSpec.DoubleValue DAY_FOG_DISTANCE;
     public static final ForgeConfigSpec.DoubleValue NIGHT_FOG_DISTANCE;
+    public static final ForgeConfigSpec.DoubleValue FLASHLIGHT_DISTANCE;
 
     static {
         ForgeConfigSpec.Builder common = new ForgeConfigSpec.Builder();
@@ -35,6 +36,9 @@ public final class PasillosConfig {
         NIGHT_FOG_DISTANCE = client
                 .comment("Distancia de visibilidad (en bloques) de noche dentro de la dimension. Menos = mas niebla.")
                 .defineInRange("distancia_noche", 6.0D, 2.0D, 64.0D);
+        FLASHLIGHT_DISTANCE = client
+                .comment("Distancia de visibilidad (en bloques) de noche con la linterna encendida en la mano.")
+                .defineInRange("distancia_linterna", 34.0D, 4.0D, 128.0D);
         client.pop();
         CLIENT_SPEC = client.build();
     }

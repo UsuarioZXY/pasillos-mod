@@ -4,5 +4,6 @@
   "message.pasillos.arrive": "Despiertas. Esa no es tu cama. Todo esta demasiado quieto.",
   "message.pasillos.leave": "Abres los ojos. Todo parece normal. Casi.",
   "message.pasillos.no_dimension": "La dimensión no está disponible.",
-  "message.pasillos.not_inside": "No estás en el mundo olvidado."
+  "message.pasillos.not_inside": "No estás en el mundo olvidado.",
+  "item.pasillos.flashlight": "Linterna"
 }
