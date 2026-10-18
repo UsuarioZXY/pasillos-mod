@@ -329,7 +329,7 @@ public final class SanityHandler {
             fake.makeHallucination(160 + player.getRandom().nextInt(160));
             fake.moveTo(x + 0.5D, y, z + 0.5D, 0.0F, 0.0F);
             fake.setState(player.getRandom().nextInt(3) == 0 ? Asechador.STATE_CROUCH : Asechador.STATE_WATCH);
-            level.addEntity(nextFakeId--, fake);
+            level.putNonPlayerEntity(nextFakeId--, fake);
             return;
         }
     }
