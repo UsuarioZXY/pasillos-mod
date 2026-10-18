@@ -1,5 +1,6 @@
 package com.pasillos.entity;
 
+import com.pasillos.event.NoiseSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -43,6 +44,8 @@ public class HideAndWatchGoal extends Goal {
     private int seenTicks;
     private int repathCooldown;
     private int relocateTimer;
+    /** Ticks que lleva "alerta" por haber oido ruido: se acerca mas (a 14-30 bloques). */
+    private int alertTicks;
 
     public HideAndWatchGoal(Asechador mob) {
         this.mob = mob;
@@ -90,6 +93,17 @@ public class HideAndWatchGoal extends Goal {
 
         double dist = this.mob.distanceTo(this.player);
 
+        // --- oye el ruido del jugador: se pone alerta y se acerca un poco ---
+        float noise = NoiseSystem.get(this.player);
+        if (noise > 4.0F && dist < noise * 0.9D) {
+            if (this.alertTicks <= 0) {
+                this.relocateTimer = 0; // se reposiciona enseguida
+            }
+            this.alertTicks = 120;
+        } else if (this.alertTicks > 0) {
+            this.alertTicks--;
+        }
+
         // --- el jugador lo ve: se congela y desaparece ---
         if (isLookedAtBy(this.player, dist)) {
             this.seenTicks++;
@@ -107,7 +121,7 @@ public class HideAndWatchGoal extends Goal {
 
         // --- esta bien colocado: se queda quieto ---
         boolean hidden = !this.player.hasLineOfSight(this.mob);
-        boolean inRange = dist >= MIN_DIST && dist <= MAX_DIST;
+        boolean inRange = dist >= minDist() && dist <= maxDist();
         boolean placed = inRange && (this.style == Style.STATUE || hidden);
         this.relocateTimer--;
 
@@ -136,6 +150,14 @@ public class HideAndWatchGoal extends Goal {
     }
 
     // ------------------------------------------------------------------------------------------
+
+    private double minDist() {
+        return this.alertTicks > 0 ? 14.0D : MIN_DIST;
+    }
+
+    private double maxDist() {
+        return this.alertTicks > 0 ? 30.0D : MAX_DIST;
+    }
 
     private void pickStyle() {
         int roll = this.mob.getRandom().nextInt(100);
@@ -178,7 +200,7 @@ public class HideAndWatchGoal extends Goal {
         RandomSource random = this.mob.getRandom();
         Vec3 eye = this.player.getEyePosition();
         double eyeHeight = this.style == Style.CROUCH ? CROUCH_EYE : STAND_EYE;
-        double minDist = this.style == Style.STATUE ? MAX_DIST - 10.0D : MIN_DIST;
+        double minDist = this.style == Style.STATUE ? maxDist() - 10.0D : minDist();
 
         for (int i = 0; i < 28; i++) {
             int x = Mth.floor(this.mob.getX() + (random.nextDouble() - 0.5D) * 30.0D);
@@ -196,7 +218,7 @@ public class HideAndWatchGoal extends Goal {
                 continue;
             }
             double d = Math.sqrt(feet.distToCenterSqr(this.player.getX(), this.player.getY(), this.player.getZ()));
-            if (d < minDist || d > MAX_DIST) {
+            if (d < minDist || d > maxDist()) {
                 continue;
             }
             if (this.style != Style.STATUE) {

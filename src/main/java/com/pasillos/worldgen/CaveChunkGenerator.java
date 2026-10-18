@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-/** Nivel -1: una unica cueva gigante de piedra rodeada de roca maciza. La forma esta en CaveShape. */
+/** Nivel -1: una red de tuneles de piedra rodeada de roca maciza. La forma esta en CaveShape. */
 public class CaveChunkGenerator extends ChunkGenerator {
 
     public static final Codec<CaveChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -57,17 +57,13 @@ public class CaveChunkGenerator extends ChunkGenerator {
             for (int cz = 0; cz < 16; cz++) {
                 int x = chunkPos.getMinBlockX() + cx;
                 int z = chunkPos.getMinBlockZ() + cz;
-                int floor = CaveShape.floor(radius, x, z);
-                int ceiling = CaveShape.ceiling(radius, x, z);
-                boolean open = floor >= 0 && ceiling - floor >= 3;
+                int[] col = CaveShape.column(radius, x, z);
 
                 for (int y = 0; y <= top; y++) {
                     BlockState state;
                     if (y == 0 || y == top) {
                         state = BEDROCK;
-                    } else if (!open || y <= floor || y >= ceiling) {
-                        state = STONE;
-                    } else if (CaveShape.pillar(radius, x, z, y, floor, ceiling)) {
+                    } else if (col == null || y <= col[0] || y >= col[1]) {
                         state = STONE;
                     } else {
                         continue; // aire

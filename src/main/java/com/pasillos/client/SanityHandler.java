@@ -50,6 +50,7 @@ public final class SanityHandler {
     private static int heartbeatTimer;
     private static int presenceCooldown;
     private static int panicTicks;
+    private static int noiseThoughtCooldown;
     private static int hallucinationTimer;
     private static int thoughtTimer;
     private static int nextFakeId = -3_000_000;
@@ -91,6 +92,14 @@ public final class SanityHandler {
             }
         }
         SanityState.tickThought();
+        if (SanityState.noiseTarget >= SanityState.noiseShown) {
+            SanityState.noiseShown = SanityState.noiseTarget;
+        } else {
+            SanityState.noiseShown = Math.max(SanityState.noiseTarget, SanityState.noiseShown - 1.5F);
+        }
+        if (noiseThoughtCooldown > 0) {
+            noiseThoughtCooldown--;
+        }
 
         float night = FogHandler.nightFactor(level, 1.0F);
         SanityState.night = night;
@@ -155,6 +164,14 @@ public final class SanityHandler {
         }
         SanityState.sanity = Mth.clamp(SanityState.sanity + delta, 0.0F, 100.0F);
 
+        // hacer ruido con el Asechador cerca te pone nervioso
+        if (stalkerNear && SanityState.noiseShown >= 30.0F) {
+            if (noiseThoughtCooldown <= 0 && nearest < 55.0D) {
+                SanityState.say("thought.pasillos.noise");
+                noiseThoughtCooldown = 1800;
+            }
+        }
+
         // --- ansiedad: se acerca a un objetivo (sube rapido, baja despacio) ---
         float target = night * (lit ? 8.0F : 18.0F) + (100.0F - SanityState.sanity) * 0.35F;
         if (stalkerNear) {
@@ -165,6 +182,9 @@ public final class SanityHandler {
         }
         if (watched) {
             target += (22.0F + 18.0F * nearK) * insane;
+        }
+        if (stalkerNear) {
+            target += SanityState.noiseShown * 0.3F * nearK2(nearest);
         }
         target = Mth.clamp(target, 0.0F, 100.0F);
         float rate = target > SanityState.anxiety ? (watched ? 0.05F : 0.03F) : 0.01F;

@@ -4,15 +4,21 @@ import com.pasillos.PasillosConfig;
 import net.minecraft.core.BlockPos;
 
 /**
- * La forma de la cueva del Nivel -1. Todo son funciones puras de las coordenadas: una sola cueva
- * gigante, redonda e irregular, centrada en (0, 0), con pilares de piedra sueltos. Fuera de ella solo hay roca.
+ * La forma del Nivel -1: una red de tuneles estrechos y altos de piedra que se cruzan, se ramifican,
+ * hacen callejones sin salida y se abren en alguna sala pequena. Todo son funciones puras de las
+ * coordenadas. Fuera de los tuneles solo hay roca maciza.
+ *
+ * La red es una cuadricula de celdas de 20 bloques con un nodo (cruce o sala) en cada una, algo
+ * desplazado; entre nodos vecinos hay un tunel o no, segun un hash.
  */
 public final class CaveShape {
 
     public static final int HEIGHT = 128;
-    private static final int PILLAR_CELL = 36;
+    private static final int CELL = 20;
+    /** Altura del suelo base. */
+    private static final int BASE_FLOOR = 40;
 
-    /** Radio configurado de la cueva en bloques (con valor de reserva si la config aun no esta cargada). */
+    /** Radio (bloques) hasta donde llega la red de tuneles; fuera es roca. */
     public static int radius() {
         try {
             return PasillosConfig.CAVE_RADIUS.get();
@@ -53,93 +59,118 @@ public final class CaveShape {
         return top + (bottom - top) * tz;
     }
 
-    /** Distancia al borde: menor que 1 = dentro de la cueva, 1 o mas = roca solida. */
-    public static double edge(int radius, int x, int z) {
-        double d = Math.sqrt((double) x * x + (double) z * z);
-        double ang = Math.atan2(z, x);
-        double r = radius * (0.84 + 0.09 * Math.sin(3.0 * ang + 1.3) + 0.05 * Math.sin(5.0 * ang + 0.4)
-                + 0.03 * Math.sin(9.0 * ang + 2.2));
-        return d / r + 0.05 * noise(x, z, 11.0, 5);
+    // ---- la red ----
+
+    private static double nodeX(int cx, int cz) {
+        return cx * CELL + 10 + 5.0 * rnd(cx, cz, 11);
     }
 
-    /** Altura del ultimo bloque de suelo (se pisa en +1), o -1 si la columna es roca maciza. */
-    public static int floor(int radius, int x, int z) {
-        double t = edge(radius, x, z);
-        if (t >= 1.0) {
-            return -1;
-        }
-        double f = 24.0 + 5.0 * noise(x, z, 28.0, 1) + 2.0 * noise(x, z, 9.0, 2);
-        if (t > 0.85) {
-            double k = (t - 0.85) / 0.15;
-            f += k * k * 6.0;
-        }
-        return (int) Math.round(f);
+    private static double nodeZ(int cx, int cz) {
+        return cz * CELL + 10 + 5.0 * rnd(cx, cz, 12);
     }
 
-    /** Altura del primer bloque de techo (roca), o -1 si la columna es roca maciza. */
-    public static int ceiling(int radius, int x, int z) {
-        double t = edge(radius, x, z);
-        if (t >= 1.0) {
-            return -1;
-        }
-        double c = 64.0 + 9.0 * noise(x, z, 40.0, 3) + 3.0 * noise(x, z, 12.0, 4);
-        double f = 24.0 + 5.0 * noise(x, z, 28.0, 1) + 2.0 * noise(x, z, 9.0, 2);
-        if (t > 0.8) {
-            double k = (t - 0.8) / 0.2;
-            c -= k * k * (c - f);
-        }
-        return (int) Math.round(c);
+    private static boolean hasNode(int radius, int cx, int cz) {
+        double x = nodeX(cx, cz);
+        double z = nodeZ(cx, cz);
+        return x * x + z * z <= (double) radius * radius;
     }
 
-    /** True si (x, z) esta en un pilar de piedra a la altura y (los pilares se estrechan por el medio). */
-    public static boolean pillar(int radius, int x, int z, int y, int floor, int ceiling) {
-        int cx = Math.floorDiv(x, PILLAR_CELL);
-        int cz = Math.floorDiv(z, PILLAR_CELL);
-        int h = hash(cx, cz, 91);
-        if (Math.floorMod(h, 100) >= 55) {
-            return false;
-        }
-        int px = cx * PILLAR_CELL + 6 + Math.floorMod(h >>> 8, 24);
-        int pz = cz * PILLAR_CELL + 6 + Math.floorMod(h >>> 16, 24);
-        double r0 = 2.5 + Math.floorMod(h >>> 4, 3);
-        double span = Math.max(1, ceiling - floor);
-        double mid = Math.abs(2.0 * (y - floor) / span - 1.0);
-        double r = r0 * (0.55 + 0.45 * mid);
-        double dx = x - px;
-        double dz = z - pz;
-        return dx * dx + dz * dz <= r * r;
+    private static boolean edgeEast(int radius, int cx, int cz) {
+        return hasNode(radius, cx, cz) && hasNode(radius, cx + 1, cz) && Math.floorMod(hash(cx, cz, 21), 100) < 66;
     }
 
-    /** Un sitio abierto donde aparecer (a los pies del jugador), o null si no se encuentra. */
-    public static BlockPos findSpawn(java.util.Random random) {
-        int radius = radius();
-        for (int i = 0; i < 80; i++) {
-            double ang = random.nextDouble() * Math.PI * 2.0;
-            double dist = random.nextDouble() * radius * 0.55;
-            int x = (int) Math.round(Math.cos(ang) * dist);
-            int z = (int) Math.round(Math.sin(ang) * dist);
-            int f = floor(radius, x, z);
-            int c = ceiling(radius, x, z);
-            if (f < 0 || c - f < 10) {
-                continue;
-            }
-            boolean blocked = false;
-            for (int dx = -1; dx <= 1 && !blocked; dx++) {
-                for (int dz = -1; dz <= 1 && !blocked; dz++) {
-                    int ff = floor(radius, x + dx, z + dz);
-                    int cc = ceiling(radius, x + dx, z + dz);
-                    for (int y = f + 1; y <= f + 3 && !blocked; y++) {
-                        if (ff < 0 || y <= ff || y >= cc || pillar(radius, x + dx, z + dz, y, ff, cc)) {
-                            blocked = true;
-                        }
+    private static boolean edgeSouth(int radius, int cx, int cz) {
+        return hasNode(radius, cx, cz) && hasNode(radius, cx, cz + 1) && Math.floorMod(hash(cx, cz, 22), 100) < 66;
+    }
+
+    private static double segmentDistance(double px, double pz, double ax, double az, double bx, double bz) {
+        double abx = bx - ax;
+        double abz = bz - az;
+        double len2 = abx * abx + abz * abz;
+        double t = len2 < 1.0E-6 ? 0.0 : ((px - ax) * abx + (pz - az) * abz) / len2;
+        t = Math.max(0.0, Math.min(1.0, t));
+        double dx = px - (ax + abx * t);
+        double dz = pz - (az + abz * t);
+        return Math.sqrt(dx * dx + dz * dz);
+    }
+
+    /**
+     * Para una columna (x, z): {ultimo bloque de suelo, primer bloque de techo}, o null si es roca maciza.
+     * Se camina en suelo + 1 y hay {techo - suelo - 1} bloques de aire encima.
+     */
+    public static int[] column(int radius, int x, int z) {
+        // las paredes ondulan un poco
+        double wx = x + 3.0 * noise(x, z, 13.0, 31);
+        double wz = z + 3.0 * noise(x, z, 13.0, 32);
+        double width = 2.6 + 0.8 * noise(x, z, 17.0, 7);
+
+        int cellX = Math.floorDiv((int) Math.floor(wx), CELL);
+        int cellZ = Math.floorDiv((int) Math.floor(wz), CELL);
+        int best = -1;
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                int cx = cellX + dx;
+                int cz = cellZ + dz;
+                if (!hasNode(radius, cx, cz)) {
+                    continue;
+                }
+                double nx = nodeX(cx, cz);
+                double nz = nodeZ(cx, cz);
+
+                // sala en el nodo
+                double roomR = 4.5 + 1.5 * (rnd(cx, cz, 13) + 1.0);
+                double dn = Math.sqrt((wx - nx) * (wx - nx) + (wz - nz) * (wz - nz));
+                if (dn < roomR) {
+                    double k = dn / roomR;
+                    best = Math.max(best, 9 - (int) Math.round(3.0 * k * k));
+                }
+                // tuneles que salen del nodo hacia el este y el sur
+                if (edgeEast(radius, cx, cz)) {
+                    double d = segmentDistance(wx, wz, nx, nz, nodeX(cx + 1, cz), nodeZ(cx + 1, cz));
+                    if (d < width) {
+                        double k = d / width;
+                        best = Math.max(best, 6 - (int) Math.round(2.0 * k * k));
+                    }
+                }
+                if (edgeSouth(radius, cx, cz)) {
+                    double d = segmentDistance(wx, wz, nx, nz, nodeX(cx, cz + 1), nodeZ(cx, cz + 1));
+                    if (d < width) {
+                        double k = d / width;
+                        best = Math.max(best, 6 - (int) Math.round(2.0 * k * k));
                     }
                 }
             }
-            if (!blocked) {
-                return new BlockPos(x, f + 1, z);
+        }
+        if (best < 3) {
+            return null;
+        }
+        int floor = BASE_FLOOR + (int) Math.round(3.0 * noise(x, z, 30.0, 1));
+        return new int[]{floor, floor + best + 1};
+    }
+
+    /** Un sitio abierto donde aparecer (a los pies del jugador): una sala con al menos un tunel. */
+    public static BlockPos findSpawn(java.util.Random random) {
+        int radius = radius();
+        int cells = Math.max(1, radius / CELL);
+        for (int i = 0; i < 200; i++) {
+            int cx = random.nextInt(cells * 2 + 1) - cells;
+            int cz = random.nextInt(cells * 2 + 1) - cells;
+            if (!hasNode(radius, cx, cz)) {
+                continue;
+            }
+            if (!(edgeEast(radius, cx, cz) || edgeSouth(radius, cx, cz) || edgeEast(radius, cx - 1, cz)
+                    || edgeSouth(radius, cx, cz - 1))) {
+                continue;
+            }
+            int x = (int) Math.round(nodeX(cx, cz));
+            int z = (int) Math.round(nodeZ(cx, cz));
+            int[] col = column(radius, x, z);
+            if (col != null && col[1] - col[0] >= 7) {
+                return new BlockPos(x, col[0] + 1, z);
             }
         }
-        return new BlockPos(0, 40, 0);
+        return new BlockPos(0, 60, 0);
     }
 
     private CaveShape() {

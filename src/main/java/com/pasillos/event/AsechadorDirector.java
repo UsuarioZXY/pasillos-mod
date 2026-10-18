@@ -62,6 +62,10 @@ public final class AsechadorDirector {
         }
         long now = level.getGameTime();
         for (ServerPlayer player : level.players()) {
+            // el ruido sostenido lo atrae antes
+            if (NoiseSystem.get(player) >= 30.0F && NEXT_SPAWN.containsKey(player.getUUID())) {
+                NEXT_SPAWN.put(player.getUUID(), Math.min(NEXT_SPAWN.get(player.getUUID()), now + 100L));
+            }
             if (player.isSpectator() || now < NEXT_SPAWN.getOrDefault(player.getUUID(), 0L)) {
                 continue;
             }
@@ -78,7 +82,7 @@ public final class AsechadorDirector {
 
         for (int i = 0; i < 10; i++) {
             double angle = level.random.nextDouble() * Math.PI * 2.0D;
-            double dist = 36.0D + level.random.nextDouble() * 8.0D;
+            double dist = (NoiseSystem.get(player) >= 30.0F ? 28.0D : 36.0D) + level.random.nextDouble() * 8.0D;
             int x = Mth.floor(player.getX() + Math.cos(angle) * dist);
             int z = Mth.floor(player.getZ() + Math.sin(angle) * dist);
             if (!level.hasChunk(x >> 4, z >> 4)) {

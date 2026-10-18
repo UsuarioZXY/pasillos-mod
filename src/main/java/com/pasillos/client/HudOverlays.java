@@ -111,6 +111,27 @@ public final class HudOverlays {
         drawEntry(g, mc, x + shake, y + 36, ANXIETY_ICON, false, 1.0F, 1.0F, 1.0F, "hud.pasillos.anxiety", 0xFFFFC8C8,
                 stateWord("hud.pasillos.anxiety.state.", anxiety, false), anxiety, SanityState.anxietyGhost,
                 SanityState.anxietyTrend, false, aColor, aFlash, 0);
+
+        drawNoise(g, mc, x, y + 72, SanityState.noiseShown);
+    }
+
+    /** Medidor de ruido: cuanto se te oye ahora mismo (el Asechador te oye a unos 0,9 x ruido bloques). */
+    private static void drawNoise(GuiGraphics g, Minecraft mc, int x, int y, float noise) {
+        int width = BAR_WIDTH;
+        g.fill(x - 3, y - 3, x + width + 4, y + 22, 0x66000000);
+        g.drawString(mc.font, Component.translatable("hud.pasillos.noise"), x, y + 1, 0xFFD8E8D0, true);
+        int idx = noise < 4.0F ? 0 : noise < 20.0F ? 1 : noise < 40.0F ? 2 : 3;
+        Component word = Component.translatable("hud.pasillos.noise.state." + idx);
+        g.drawString(mc.font, word, x + width - mc.font.width(word), y + 1, 0xFFB0B0B0, false);
+        int by = y + 11;
+        g.fill(x - 1, by - 1, x + width + 1, by + 6, 0xFF000000);
+        g.fill(x, by, x + width, by + 5, 0xFF262626);
+        int filled = (int) (width * Mth.clamp(noise / 60.0F, 0.0F, 1.0F));
+        int color = noise < 20.0F ? 0xFF6FD07A : noise < 40.0F ? 0xFFE0C050 : 0xFFE05A4A;
+        if (filled > 0) {
+            g.fill(x, by, x + filled, by + 5, color);
+            g.fill(x, by, x + filled, by + 1, 0x55FFFFFF);
+        }
     }
 
     /** Palabra de estado segun el valor. Para la cordura, menos es peor; para la ansiedad, mas es peor. */

@@ -21,6 +21,10 @@ public final class SanityHooks {
         }
     }
 
+    public static void setNoise(float noise) {
+        SanityState.noiseTarget = Mth.clamp(noise, 0.0F, 60.0F);
+    }
+
     private SanityHooks() {
     }
 }

@@ -30,6 +30,10 @@ public final class SanityState {
     public static int anxietyHeal = 0;
     /** Destello rojo cuando la cordura cae rapido. */
     public static int hurtFlash = 0;
+    /** Ruido que haces: ultimo valor del servidor y valor mostrado (sube rapido, baja suave). */
+    public static float noiseTarget = 0.0F;
+    public static float noiseShown = 0.0F;
+
     /** Pensamiento o mensaje que se muestra ahora (clave de traduccion) y ticks que le quedan. */
     public static String thoughtKey = "";
     public static int thoughtTicks = 0;
@@ -69,6 +73,8 @@ public final class SanityState {
         sanityHeal = 0;
         anxietyHeal = 0;
         hurtFlash = 0;
+        noiseTarget = 0.0F;
+        noiseShown = 0.0F;
         thoughtKey = "";
         thoughtTicks = 0;
         THOUGHT_QUEUE.clear();

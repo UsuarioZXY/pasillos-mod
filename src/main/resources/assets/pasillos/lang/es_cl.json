@@ -33,5 +33,11 @@
   "thought.pasillos.panic": "No puedo respirar...",
   "thought.pasillos.heart": "¡Mi pecho! ¡Me duele el pecho!",
   "thought.pasillos.tremor": "Me tiemblan las manos...",
-  "message.pasillos.entered_depth": "Caes cada vez más hondo."
+  "message.pasillos.entered_depth": "Caes cada vez más hondo.",
+  "hud.pasillos.noise": "Ruido",
+  "hud.pasillos.noise.state.0": "Silencio",
+  "hud.pasillos.noise.state.1": "Bajo",
+  "hud.pasillos.noise.state.2": "Medio",
+  "hud.pasillos.noise.state.3": "Alto",
+  "thought.pasillos.noise": "Hice demasiado ruido... me oyó."
 }

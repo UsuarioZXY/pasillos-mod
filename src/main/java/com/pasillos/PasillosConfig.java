@@ -34,7 +34,7 @@ public final class PasillosConfig {
         common.pop();
         common.push("nivel_menos_1");
         CAVE_RADIUS = common
-                .comment("Radio de la cueva gigante del Nivel -1, en bloques. Menos = cueva mas pequena. Solo afecta a chunks nuevos.")
+                .comment("Radio (bloques) de la red de tuneles del Nivel -1. Menos = menos tuneles. Solo afecta a chunks nuevos.")
                 .defineInRange("radio_cueva", 140, 40, 800);
         DEPTH_TRIGGER_OVERWORLD = common
                 .comment("Altura (Y) por debajo de la cual, en el Overworld, caes al Nivel -1. La base del mundo esta en -64.")
