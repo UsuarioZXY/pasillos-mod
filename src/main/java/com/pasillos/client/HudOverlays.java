@@ -182,14 +182,14 @@ public final class HudOverlays {
     /** Mensaje "Hay una presencia extraña al alrededor..." encima de la barra de objetos. */
     private static void renderPresence(ForgeGui gui, GuiGraphics g, float partialTick, int w, int h) {
         Minecraft mc = Minecraft.getInstance();
-        if (!SanityState.inside || mc.options.hideGui || SanityState.presenceTicks <= 0) {
+        if (!SanityState.inside || mc.options.hideGui || SanityState.thoughtTicks <= 0) {
             return;
         }
-        int total = SanityState.PRESENCE_TOTAL;
-        float t = total - SanityState.presenceTicks + partialTick; // ticks desde que empezo
+        int total = SanityState.THOUGHT_TOTAL;
+        float t = total - SanityState.thoughtTicks + partialTick; // ticks desde que empezo
         float alpha = Math.min(1.0F, t / 14.0F);
-        if (SanityState.presenceTicks < 40) {
-            alpha = Math.min(alpha, SanityState.presenceTicks / 40.0F);
+        if (SanityState.thoughtTicks < 40) {
+            alpha = Math.min(alpha, SanityState.thoughtTicks / 40.0F);
         }
         if (alpha < 0.06F) {
             return; // la fuente trata alfa muy bajo como opaco
@@ -199,7 +199,7 @@ public final class HudOverlays {
         float ox = Mth.sin(time * 3.1F) * 1.5F * jitter;
         float oy = Mth.cos(time * 2.3F) * 1.0F * jitter;
 
-        Component text = Component.translatable("message.pasillos.presence").withStyle(ChatFormatting.ITALIC);
+        Component text = Component.translatable(SanityState.thoughtKey).withStyle(ChatFormatting.ITALIC);
         int a = Mth.clamp((int) (alpha * 255.0F), 4, 255);
         float scale = 1.15F;
         int tw = mc.font.width(text);

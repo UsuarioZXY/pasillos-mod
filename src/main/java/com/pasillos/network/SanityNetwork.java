@@ -20,11 +20,18 @@ public final class SanityNetwork {
     public static void register() {
         CHANNEL.registerMessage(0, SanityMessage.class,
                 SanityMessage::encode, SanityMessage::decode, SanityMessage::handle);
+        CHANNEL.registerMessage(1, PanicMessage.class,
+                PanicMessage::encode, PanicMessage::decode, PanicMessage::handle);
     }
 
     /** Cambia la cordura y la ansiedad del jugador (valores positivos suben, negativos bajan). */
     public static void send(ServerPlayer player, float sanityDelta, float anxietyDelta) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SanityMessage(sanityDelta, anxietyDelta));
+    }
+
+    /** Del cliente al servidor: avisa de que el jugador sufre un ataque de panico, mareo o temblor. */
+    public static void sendPanic(int kind) {
+        CHANNEL.sendToServer(new PanicMessage(kind));
     }
 
     private SanityNetwork() {

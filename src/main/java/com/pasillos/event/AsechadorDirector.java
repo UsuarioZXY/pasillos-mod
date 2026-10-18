@@ -2,6 +2,7 @@ package com.pasillos.event;
 
 import com.pasillos.PasillosMod;
 import com.pasillos.entity.Asechador;
+import com.pasillos.entity.Ground;
 import com.pasillos.registry.ModDimensions;
 import com.pasillos.registry.ModEntities;
 import net.minecraft.core.BlockPos;
@@ -52,10 +53,10 @@ public final class AsechadorDirector {
         if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) {
             return;
         }
-        if (!level.dimension().equals(ModDimensions.NIVEL_0) || level.getGameTime() % 40L != 0L) {
+        if (!ModDimensions.isMod(level.dimension()) || level.getGameTime() % 40L != 0L) {
             return;
         }
-        if (!level.isNight() || level.getDifficulty() == Difficulty.PEACEFUL
+        if (!Ground.isDark(level) || level.getDifficulty() == Difficulty.PEACEFUL
                 || !level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
             return;
         }
@@ -83,9 +84,13 @@ public final class AsechadorDirector {
             if (!level.hasChunk(x >> 4, z >> 4)) {
                 continue;
             }
-            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            int y = Ground.standY(level, x, z, player.getBlockY());
+            if (y == Ground.NONE) {
+                continue;
+            }
             BlockPos feet = new BlockPos(x, y, z);
-            if (!level.getBlockState(feet.below()).is(Blocks.GRASS_BLOCK)
+            if (level.dimension().equals(ModDimensions.NIVEL_0)
+                    && !level.getBlockState(feet.below()).is(Blocks.GRASS_BLOCK)
                     && !level.getBlockState(feet.below()).is(Blocks.COARSE_DIRT)) {
                 continue;
             }

@@ -72,6 +72,9 @@ public final class FogHandler {
 
     /** 0 = pleno dia, 1 = noche cerrada, con transicion suave al atardecer y al amanecer. */
     public static float nightFactor(ClientLevel level, float partial) {
+        if (level.dimension().equals(ModDimensions.NIVEL_MENOS_1)) {
+            return 0.65F; // la cueva siempre esta a oscuras
+        }
         float sunHeight = Mth.cos(level.getTimeOfDay(partial) * Mth.TWO_PI);
         float n = Mth.clamp((0.15F - sunHeight) / 0.45F, 0.0F, 1.0F);
         return n * n * (3.0F - 2.0F * n);

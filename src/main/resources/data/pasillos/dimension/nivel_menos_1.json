@@ -1,0 +1,10 @@
+{
+  "type": "pasillos:nivel_menos_1",
+  "generator": {
+    "type": "pasillos:cave",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "pasillos:nivel_menos_1"
+    }
+  }
+}

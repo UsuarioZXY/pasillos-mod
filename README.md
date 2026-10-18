@@ -13,6 +13,11 @@ Mod de terror para Minecraft Forge 1.20.1.
   - Cuando hay uno merodeando sale el mensaje *"Hay una presencia extraña al alrededor..."*, con un sonido grave (cada 2 a 3 minutos como mucho).
   - Las barras muestran icono, estado (Estable / Inquieta / Frágil / Quebrada; Calma / Tensa / Alta / Pánico), porcentaje, flecha de tendencia, estela de lo perdido, marcas en 25/50/75 y destellos al curarte o herirte.
 - **Sancor y Anx:** *Sancor* es una bebida (+45 cordura, −12 ansiedad, devuelve la botella vacía, espera de 5 s). *Anx* son pastillas (−38 ansiedad, +6 cordura, dan algo de lentitud 6 s, espera de 3 s). Aparecen en *Saco pequeño*, que hay muy de vez en cuando junto a algún árbol (1 de cada ~28 árboles): clic derecho para abrirlo.
+- **Cuando la mente se rompe:**
+  - Con la **ansiedad al 100 %** (pánico), cada segundo sube la probabilidad de un **ataque al corazón**: un golpe fuerte (nunca te mata, te deja con medio corazón como mínimo), ceguera, náuseas, lentitud y debilidad. Después la ansiedad baja a la mitad y la cordura cae 20. Se ajusta en `ataque_corazon_por_segundo` (0 lo desactiva).
+  - Con **cordura baja (< 35)** ves **alucinaciones**: un Asechador falso a tu espalda que desaparece al mirarlo, pero te asusta igualmente (ansiedad +9, cordura −3). Si hay uno real cerca y tu cordura es baja (< 30), te afecta un 40 % más.
+  - Con cordura muy baja (< 25) o ansiedad alta (≥ 75) a veces te mareas, se te va la vista o te tiemblan las manos y no puedes picar bien. Además te salen pensamientos sueltos ("Algo me observa.", "Quiero despertar."...).
+- **Nivel -1:** si **bajas hasta el fondo del Overworld** (Y -60 por defecto) o te cavas hasta el suelo de bedrock del Nivel 0, caes a una **cueva gigante de piedra**, una sola, redonda e irregular, con pilares de piedra, sin mobs normales y a oscuras (sin niebla, solo oscuridad: lleva antorchas). Al llegar oyes tus pensamientos: "¿Dónde estoy?...". El Asechador sigue ahí, escondiéndose detrás de los pilares y las paredes. La cueva es de **140 bloques de radio**; cámbialo en `radio_cueva` (solo afecta a chunks nuevos). Para salir: duerme en una cama dentro (siempre es "de noche"), o `/pasillos volver`.
 - **Niebla nocturna:** de noche el mundo se oscurece y la niebla se cierra a unos 30 bloques, se vuelve casi negra y avanza y retrocede. Las siluetas lejanas siguen viéndose dentro de ella. Se ajusta en `distancia_noche`.
 - **El Asechador (Stalker):** una silueta negra y descarnada de unos 3,8 bloques. Cuello largo, cabeza ovalada ladeada y sin cuernos, ojos blancos con pupila de rendija, mandíbula que cuelga entreabierta con colmillos, columna y costillas marcadas, brazos que cuelgan hasta las rodillas y terminan en tres dedos larguísimos de hueso. Echa ceniza y tinta negra. Nunca ataca.
   - Animaciones: respira, la cabeza se ladea de golpe en tics, la mandíbula se abre y se cierra, camina con zancada rígida, se agazapa y se asoma con una mano apoyada.
@@ -37,6 +42,7 @@ Si prefieres compilar en tu PC: JDK 17, MDK de Forge 1.20.1, copia `build.gradle
 | Comando | Qué hace |
 |---|---|
 | `/pasillos entrar` | Te manda a la dimensión |
+| `/pasillos profundo` | Te manda al Nivel -1 |
 | `/pasillos volver` | Te saca de la dimensión |
 | `/pasillos asechador` | Aparece un Asechador a unos 18 bloques |
 | `/pasillos saco` | Coloca un saco delante de ti |
@@ -47,8 +53,8 @@ También hay un huevo generador del Asechador en la pestaña de huevos del modo 
 
 ## Configuración
 
-- `pasillos-common.toml`: `probabilidad_al_dormir` y `ticks_hasta_el_salto`.
-- `pasillos-client.toml`: `distancia_dia` y `distancia_noche` de la niebla, en bloques.
+- `pasillos-common.toml`: `probabilidad_al_dormir`, `ticks_hasta_el_salto`, `radio_cueva`, `altura_overworld` y `altura_nivel_0`.
+- `pasillos-client.toml`: `distancia_dia` y `distancia_noche` de la niebla, en bloques, y `ataque_corazon_por_segundo`.
 
 ## Estructura
 
@@ -57,6 +63,7 @@ También hay un huevo generador del Asechador en la pestaña de huevos del modo 
 - `client/AsechadorModel.java` y `AsechadorRenderer.java`: el modelo 3D, las animaciones y los ojos brillantes.
 - `client/SanityState.java` y `SanityHandler.java`: cordura, ansiedad y sus efectos. `client/HudOverlays.java`: barras y oscuridad nocturna. `client/FogHandler.java`: la niebla.
 - `item/`, `block/SackBlock.java`, `network/`: Sancor, Anx, el saco y el paquete que cambia la cordura desde el servidor. El botín del saco está en `data/pasillos/loot_tables/blocks/saco.json`.
+- `worldgen/CaveShape.java` y `CaveChunkGenerator.java`: la cueva del Nivel -1. `event/DepthHandler.java`: la caída. `event/PanicHandler.java` y `network/PanicMessage.java`: ataques al corazón y mareos.
 - `DreamTravel.java` y `event/SleepHandler.java`: entrar y salir al dormir.
 - `data/pasillos/...`: dimensión, tipo de dimensión, bioma y receta en JSON.
 

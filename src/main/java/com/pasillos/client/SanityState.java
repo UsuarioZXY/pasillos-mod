@@ -3,8 +3,8 @@ package com.pasillos.client;
 /** Estado del lado del cliente: cordura y ansiedad. Solo se usa dentro de la dimension. */
 public final class SanityState {
 
-    /** Cuantos ticks dura el mensaje de presencia en pantalla. */
-    public static final int PRESENCE_TOTAL = 140;
+    /** Cuantos ticks dura cada pensamiento / mensaje en pantalla. */
+    public static final int THOUGHT_TOTAL = 140;
 
     /** True mientras el jugador esta en la dimension. */
     public static boolean inside = false;
@@ -30,8 +30,30 @@ public final class SanityState {
     public static int anxietyHeal = 0;
     /** Destello rojo cuando la cordura cae rapido. */
     public static int hurtFlash = 0;
-    /** Ticks restantes del mensaje "presencia extraña". */
-    public static int presenceTicks = 0;
+    /** Pensamiento o mensaje que se muestra ahora (clave de traduccion) y ticks que le quedan. */
+    public static String thoughtKey = "";
+    public static int thoughtTicks = 0;
+    private static final java.util.ArrayDeque<String> THOUGHT_QUEUE = new java.util.ArrayDeque<>();
+
+    /** Muestra un pensamiento; si ya hay uno en pantalla, se pone en cola. */
+    public static void say(String key) {
+        if (thoughtTicks <= 0) {
+            thoughtKey = key;
+            thoughtTicks = THOUGHT_TOTAL;
+        } else if (THOUGHT_QUEUE.size() < 4 && !thoughtKey.equals(key) && !THOUGHT_QUEUE.contains(key)) {
+            THOUGHT_QUEUE.add(key);
+        }
+    }
+
+    /** Avanza el pensamiento actual; cuando termina saca el siguiente de la cola. */
+    public static void tickThought() {
+        if (thoughtTicks > 0) {
+            thoughtTicks--;
+        } else if (!THOUGHT_QUEUE.isEmpty()) {
+            thoughtKey = THOUGHT_QUEUE.poll();
+            thoughtTicks = THOUGHT_TOTAL;
+        }
+    }
 
     public static void reset() {
         inside = false;
@@ -47,7 +69,9 @@ public final class SanityState {
         sanityHeal = 0;
         anxietyHeal = 0;
         hurtFlash = 0;
-        presenceTicks = 0;
+        thoughtKey = "";
+        thoughtTicks = 0;
+        THOUGHT_QUEUE.clear();
     }
 
     private SanityState() {

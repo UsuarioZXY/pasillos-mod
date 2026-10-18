@@ -55,9 +55,34 @@ public class Asechador extends PathfinderMob {
     private float stareAmount;
     private float stareAmountO;
 
+    /** Solo cliente: es una alucinacion (no existe en el servidor) y cuantos ticks le quedan. */
+    private boolean hallucination;
+    private int hallucinationLife;
+
     public Asechador(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         this.xpReward = 0;
+    }
+
+    public boolean isHallucination() {
+        return this.hallucination;
+    }
+
+    public int getHallucinationLife() {
+        return this.hallucinationLife;
+    }
+
+    public void setHallucinationLife(int ticks) {
+        this.hallucinationLife = ticks;
+    }
+
+    /** Lo convierte en una alucinacion: solo la ve el jugador, no hace nada y se esfuma sola. */
+    public void makeHallucination(int lifeTicks) {
+        this.hallucination = true;
+        this.hallucinationLife = lifeTicks;
+        this.setNoGravity(true);
+        this.noPhysics = true;
+        this.setSilent(true);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -221,7 +246,7 @@ public class Asechador extends PathfinderMob {
     /** Solo se usa si el bioma lo lista; en esta version lo controla AsechadorDirector. */
     public static boolean canSpawn(EntityType<Asechador> type, ServerLevelAccessor level, MobSpawnType reason,
                                    BlockPos pos, RandomSource random) {
-        return level.getLevel().isNight()
+        return Ground.isDark(level.getLevel())
                 && level.getEntitiesOfClass(Asechador.class, new AABB(pos).inflate(96.0D)).isEmpty();
     }
 }

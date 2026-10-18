@@ -21,6 +21,7 @@ import net.minecraftforge.fml.common.Mod;
 /**
  * /pasillos asechador -> aparece un Asechador a unos 18 bloques
  * /pasillos entrar  -> te manda al Nivel 0
+ * /pasillos profundo -> te manda al Nivel -1 (la cueva)
  * /pasillos volver  -> te saca del Nivel 0
  * /pasillos saco    -> coloca un saco delante de ti
  * /pasillos noche   -> pone la noche en el mundo (para probar la niebla)
@@ -37,6 +38,11 @@ public final class PasillosCommand {
                 .then(Commands.literal("entrar").executes(ctx -> {
                     ServerPlayer player = ctx.getSource().getPlayerOrException();
                     DreamTravel.enter(player);
+                    return 1;
+                }))
+                .then(Commands.literal("profundo").executes(ctx -> {
+                    ServerPlayer player = ctx.getSource().getPlayerOrException();
+                    DreamTravel.enterDepth(player);
                     return 1;
                 }))
                 .then(Commands.literal("volver").executes(ctx -> {

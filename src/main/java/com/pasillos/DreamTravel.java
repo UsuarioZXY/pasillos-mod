@@ -2,6 +2,7 @@ package com.pasillos;
 
 import com.pasillos.event.AsechadorDirector;
 import com.pasillos.registry.ModDimensions;
+import com.pasillos.worldgen.CaveShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -25,7 +26,7 @@ public final class DreamTravel {
     private static final String RETURN_TAG = "pasillos_return";
 
     public static boolean isInside(ServerPlayer player) {
-        return player.level().dimension().equals(ModDimensions.NIVEL_0);
+        return ModDimensions.isMod(player.level().dimension());
     }
 
     /** Lleva al jugador al Nivel 0, recordando de donde venia. */
@@ -59,6 +60,35 @@ public final class DreamTravel {
 
         // el Asechador tarda de 30 a 60 segundos en aparecer
         AsechadorDirector.delayFor(player, 600 + player.getRandom().nextInt(600));
+    }
+
+    /** Lleva al jugador al Nivel -1 (la cueva gigante), recordando de donde venia si aun estaba en el mundo normal. */
+    public static void enterDepth(ServerPlayer player) {
+        MinecraftServer server = player.server;
+        ServerLevel target = server.getLevel(ModDimensions.NIVEL_MENOS_1);
+        if (target == null) {
+            player.displayClientMessage(Component.translatable("message.pasillos.no_dimension"), true);
+            return;
+        }
+        if (!isInside(player)) {
+            CompoundTag origin = new CompoundTag();
+            origin.putString("dim", player.level().dimension().location().toString());
+            origin.putDouble("x", player.getX());
+            origin.putDouble("y", player.getY());
+            origin.putDouble("z", player.getZ());
+            origin.putFloat("yRot", player.getYRot());
+            player.getPersistentData().put(RETURN_TAG, origin);
+        }
+        if (player.isSleeping()) {
+            player.stopSleepInBed(true, true);
+        }
+        BlockPos spawn = CaveShape.findSpawn(new java.util.Random(player.getRandom().nextLong()));
+        target.getChunk(spawn.getX() >> 4, spawn.getZ() >> 4);
+        player.teleportTo(target, spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, player.getYRot(), 0.0F);
+        player.fallDistance = 0.0F;
+        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 140, 0, false, false));
+        player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 100, 0, false, false));
+        AsechadorDirector.delayFor(player, 900 + player.getRandom().nextInt(600));
     }
 
     /** Busca suelo firme de hierba o arena cerca de unas coordenadas, generando los chunks necesarios. */
@@ -114,7 +144,7 @@ public final class DreamTravel {
         }
 
         // Si dormir dentro de los Pasillos cambio el punto de reaparicion, lo devolvemos al mundo normal
-        if (ModDimensions.NIVEL_0.equals(player.getRespawnDimension())) {
+        if (ModDimensions.isMod(player.getRespawnDimension())) {
             player.setRespawnPosition(Level.OVERWORLD, null, 0.0F, false, false);
         }
 

@@ -156,7 +156,7 @@ public class HideAndWatchGoal extends Goal {
 
     /** Hasta donde ve el jugador: mucho de dia; de noche la niebla lo limita a unos 30 bloques. */
     private double visibleRange() {
-        return this.mob.level().isNight() ? 30.0D : 64.0D;
+        return Ground.isDark(this.mob.level()) ? 30.0D : 64.0D;
     }
 
     /** Coseno del angulo entre la mirada del jugador y la direccion hacia el Asechador. */
@@ -186,7 +186,10 @@ public class HideAndWatchGoal extends Goal {
             if (!this.mob.level().hasChunk(x >> 4, z >> 4)) {
                 continue;
             }
-            int y = this.mob.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            int y = Ground.standY(this.mob.level(), x, z, this.mob.getBlockY());
+            if (y == Ground.NONE) {
+                continue;
+            }
             BlockPos feet = new BlockPos(x, y, z);
 
             if (!this.mob.level().getFluidState(feet.below()).isEmpty()) {

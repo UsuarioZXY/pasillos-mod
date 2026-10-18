@@ -3,6 +3,7 @@ package com.pasillos.registry;
 import com.mojang.serialization.Codec;
 import com.pasillos.PasillosMod;
 import com.pasillos.worldgen.AncientChunkGenerator;
+import com.pasillos.worldgen.CaveChunkGenerator;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.registries.DeferredRegister;
@@ -15,6 +16,9 @@ public final class ModChunkGenerators {
 
     public static final RegistryObject<Codec<AncientChunkGenerator>> ANCIENT =
             CHUNK_GENERATORS.register("ancient", () -> AncientChunkGenerator.CODEC);
+
+    public static final RegistryObject<Codec<CaveChunkGenerator>> CAVE =
+            CHUNK_GENERATORS.register("cave", () -> CaveChunkGenerator.CODEC);
 
     private ModChunkGenerators() {
     }
