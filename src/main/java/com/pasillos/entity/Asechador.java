@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
@@ -38,10 +39,21 @@ public class Asechador extends PathfinderMob {
     public static final int STATE_PEEK = 1;
     /** Agazapado, mucho mas bajo. */
     public static final int STATE_CROUCH = 2;
+    /** Te ha pillado mirandolo: se queda rigido, con la boca abierta, justo antes de desvanecerse. */
+    public static final int STATE_STARE = 3;
 
     private static final EntityDataAccessor<Integer> STATE =
             SynchedEntityData.defineId(Asechador.class, EntityDataSerializers.INT);
     private static final EntityDimensions CROUCH_SIZE = EntityDimensions.scalable(0.9F, 1.9F);
+
+    // Solo del lado del cliente: cuanto de cada pose se ha alcanzado (0 a 1), para que el modelo
+    // pase de una pose a otra poco a poco en vez de dar un salto.
+    private float crouchAmount;
+    private float crouchAmountO;
+    private float peekAmount;
+    private float peekAmountO;
+    private float stareAmount;
+    private float stareAmountO;
 
     public Asechador(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -94,6 +106,32 @@ public class Asechador extends PathfinderMob {
         return this.getState() == STATE_CROUCH ? CROUCH_SIZE : super.getDimensions(pose);
     }
 
+    public float getCrouchAmount(float partialTick) {
+        return Mth.lerp(partialTick, this.crouchAmountO, this.crouchAmount);
+    }
+
+    public float getPeekAmount(float partialTick) {
+        return Mth.lerp(partialTick, this.peekAmountO, this.peekAmount);
+    }
+
+    public float getStareAmount(float partialTick) {
+        return Mth.lerp(partialTick, this.stareAmountO, this.stareAmount);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.level().isClientSide) {
+            int state = this.getState();
+            this.crouchAmountO = this.crouchAmount;
+            this.peekAmountO = this.peekAmount;
+            this.stareAmountO = this.stareAmount;
+            this.crouchAmount += ((state == STATE_CROUCH ? 1.0F : 0.0F) - this.crouchAmount) * 0.18F;
+            this.peekAmount += ((state == STATE_PEEK ? 1.0F : 0.0F) - this.peekAmount) * 0.14F;
+            this.stareAmount += ((state == STATE_STARE ? 1.0F : 0.0F) - this.stareAmount) * 0.4F;
+        }
+    }
+
     // ------------------------------------------------------------------------------------------
     // Vida
     // ------------------------------------------------------------------------------------------
@@ -132,6 +170,14 @@ public class Asechador extends PathfinderMob {
                     this.getY() + height * 0.85D,
                     this.getZ() + (random.nextDouble() - 0.5D) * 0.8D,
                     0.0D, 0.02D, 0.0D);
+        }
+        if (this.getState() == STATE_STARE) {
+            // pillado: suelta humo negro por la boca y la ceniza se agita
+            this.level().addParticle(ParticleTypes.LARGE_SMOKE,
+                    this.getX() + (random.nextDouble() - 0.5D) * 0.3D,
+                    this.getY() + height * 0.84D,
+                    this.getZ() + (random.nextDouble() - 0.5D) * 0.3D,
+                    0.0D, 0.03D, 0.0D);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.pasillos.worldgen;
 
+import com.pasillos.registry.ModBlocks;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
@@ -72,6 +73,7 @@ public class AncientChunkGenerator extends ChunkGenerator {
         Heightmap oceanFloor = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
         Heightmap worldSurface = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
         BlockState[] column = new BlockState[HEIGHT];
+        BlockState sack = ModBlocks.SACK.get().defaultBlockState();
 
         for (int cx = 0; cx < 16; cx++) {
             for (int cz = 0; cz < 16; cz++) {
@@ -80,7 +82,7 @@ public class AncientChunkGenerator extends ChunkGenerator {
 
                 Arrays.fill(column, null);
                 fillGround(column, x, z);
-                addPattern(column, x, z);
+                addPattern(column, x, z, sack);
 
                 for (int y = 0; y < HEIGHT; y++) {
                     BlockState state = column[y];
@@ -111,12 +113,29 @@ public class AncientChunkGenerator extends ChunkGenerator {
         }
     }
 
+    /** Hash simple y estable de una celda, para decidir donde van los sacos. */
+    public static int hash(int x, int z, int salt) {
+        int h = x * 374761393 + z * 668265263 + salt * 144665;
+        h = (h ^ (h >>> 13)) * 1274126177;
+        return (h ^ (h >>> 16)) & 0x7FFFFFFF;
+    }
+
     /** Un arbol (o un pilar) en el centro de cada celda de la cuadricula; todos exactamente iguales. */
-    private static void addPattern(BlockState[] column, int x, int z) {
+    private static void addPattern(BlockState[] column, int x, int z, BlockState sack) {
         int gx = Math.floorDiv(x, GRID);
         int gz = Math.floorDiv(z, GRID);
         int dx = x - (gx * GRID + 3);
         int dz = z - (gz * GRID + 3);
+        boolean isPillarCell = Math.floorMod(gx, PILLAR_EVERY) == 0 && Math.floorMod(gz, PILLAR_EVERY) == 0;
+        if (!isPillarCell && Math.floorMod(hash(gx, gz, 77), 28) == 0) {
+            int slot = hash(gx, gz, 78) & 3;
+            int sx = slot == 2 ? -1 : slot == 3 ? 1 : 0;
+            int sz = slot == 0 ? -1 : slot == 1 ? 1 : 0;
+            if (dx == sx && dz == sz) {
+                column[FLAT_Y + 1] = sack;
+                return;
+            }
+        }
         if (Math.abs(dx) > 2 || Math.abs(dz) > 2) {
             return;
         }

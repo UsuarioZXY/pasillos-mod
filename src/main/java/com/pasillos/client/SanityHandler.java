@@ -32,7 +32,11 @@ public final class SanityHandler {
     /** Nivel de luz de bloque a partir del cual se considera que estas "a la luz". */
     private static final int LIT_LEVEL = 8;
 
+    /** Distancia maxima a la que un Asechador que te mira te afecta. */
+    private static final double WATCH_DIST = 48.0D;
+
     private static int heartbeatTimer;
+    private static int presenceCooldown;
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
@@ -53,6 +57,7 @@ public final class SanityHandler {
             SanityState.reset();
             SanityState.inside = true;
             heartbeatTimer = 0;
+            presenceCooldown = 200;
         }
 
         float night = FogHandler.nightFactor(level, 1.0F);
@@ -64,17 +69,40 @@ public final class SanityHandler {
         List<Asechador> stalkers = level.getEntitiesOfClass(Asechador.class, player.getBoundingBox().inflate(64.0D));
         double nearest = Double.MAX_VALUE;
         boolean seen = false;
+        boolean watched = false;
         double visible = night > 0.4F ? NIGHT_VISIBLE : 64.0D;
         Vec3 view = player.getViewVector(1.0F).normalize();
         for (Asechador stalker : stalkers) {
             double dist = stalker.distanceTo(player);
             nearest = Math.min(nearest, dist);
             Vec3 toStalker = stalker.getEyePosition().subtract(player.getEyePosition()).normalize();
+            if (dist <= WATCH_DIST && stalker.hasLineOfSight(player)) {
+                watched = true;
+            }
             if (dist <= visible && view.dot(toStalker) > 0.95D && player.hasLineOfSight(stalker)) {
                 seen = true;
             }
         }
         boolean stalkerNear = nearest < 64.0D;
+        SanityState.watched = watched;
+        SanityState.seen = seen;
+        float nearK = stalkerNear ? (float) (1.0D - Math.min(nearest, 48.0D) / 48.0D) : 0.0F;
+        float oldSanity = SanityState.sanity;
+        float oldAnxiety = SanityState.anxiety;
+
+        // --- mensaje de presencia ---
+        if (presenceCooldown > 0) {
+            presenceCooldown--;
+        }
+        if (nearest < 64.0D && presenceCooldown <= 0) {
+            SanityState.presenceTicks = SanityState.PRESENCE_TOTAL;
+            presenceCooldown = 2400 + player.getRandom().nextInt(1200);
+            level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_NEARBY_CLOSE,
+                    SoundSource.AMBIENT, 0.5F, 0.6F, false);
+        }
+        if (SanityState.presenceTicks > 0) {
+            SanityState.presenceTicks--;
+        }
 
         // --- cordura ---
         float delta = 0.0F;
@@ -83,6 +111,9 @@ public final class SanityHandler {
         }
         if (stalkerNear) {
             delta -= 0.03F * (float) (1.0D - nearest / 64.0D);
+        }
+        if (watched) {
+            delta -= 0.035F + 0.04F * nearK;
         }
         if (seen) {
             delta -= 0.12F;
@@ -100,11 +131,40 @@ public final class SanityHandler {
                 target += 30.0F;
             }
         }
+        if (watched) {
+            target += 22.0F + 18.0F * nearK;
+        }
         target = Mth.clamp(target, 0.0F, 100.0F);
-        float rate = target > SanityState.anxiety ? 0.03F : 0.01F;
+        float rate = target > SanityState.anxiety ? (watched ? 0.05F : 0.03F) : 0.01F;
         SanityState.anxiety = Mth.clamp(SanityState.anxiety + (target - SanityState.anxiety) * rate, 0.0F, 100.0F);
 
+        // --- tendencias, estela de las barras y destellos ---
+        float dS = SanityState.sanity - oldSanity;
+        float dA = SanityState.anxiety - oldAnxiety;
+        SanityState.sanityTrend += (dS * 20.0F - SanityState.sanityTrend) * 0.05F;
+        SanityState.anxietyTrend += (dA * 20.0F - SanityState.anxietyTrend) * 0.05F;
+        SanityState.sanityGhost = approach(SanityState.sanityGhost, SanityState.sanity, 0.25F);
+        SanityState.anxietyGhost = approach(SanityState.anxietyGhost, SanityState.anxiety, 0.25F);
+        if (dS < -0.06F) {
+            SanityState.hurtFlash = 8;
+        } else if (SanityState.hurtFlash > 0) {
+            SanityState.hurtFlash--;
+        }
+        if (SanityState.sanityHeal > 0) {
+            SanityState.sanityHeal--;
+        }
+        if (SanityState.anxietyHeal > 0) {
+            SanityState.anxietyHeal--;
+        }
+
         applyEffects(level, player);
+    }
+
+    private static float approach(float value, float target, float step) {
+        if (value < target) {
+            return Math.min(target, value + step);
+        }
+        return Math.max(target, value - step);
     }
 
     private static void applyEffects(ClientLevel level, LocalPlayer player) {

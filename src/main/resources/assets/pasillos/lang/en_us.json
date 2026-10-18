@@ -6,5 +6,20 @@
   "message.pasillos.no_dimension": "The dimension is not available.",
   "message.pasillos.not_inside": "You are not in the forgotten world.",
   "hud.pasillos.sanity": "Sanity",
-  "hud.pasillos.anxiety": "Anxiety"
+  "hud.pasillos.anxiety": "Anxiety",
+  "block.pasillos.saco": "Small Sack",
+  "item.pasillos.sancor": "Sancor",
+  "item.pasillos.sancor.desc": "A lukewarm drink that restores your sanity.",
+  "item.pasillos.anx": "Anx",
+  "item.pasillos.anx.desc": "Pills that calm your anxiety. They make you a bit drowsy.",
+  "message.pasillos.presence": "There is a strange presence around you...",
+  "hud.pasillos.sanity.state.0": "Steady",
+  "hud.pasillos.sanity.state.1": "Uneasy",
+  "hud.pasillos.sanity.state.2": "Fragile",
+  "hud.pasillos.sanity.state.3": "Shattered",
+  "hud.pasillos.anxiety.state.0": "Calm",
+  "hud.pasillos.anxiety.state.1": "Tense",
+  "hud.pasillos.anxiety.state.2": "High",
+  "hud.pasillos.anxiety.state.3": "Panic",
+  "message.pasillos.no_space": "There is no room for the sack."
 }

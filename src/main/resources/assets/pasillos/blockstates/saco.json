@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "pasillos:block/saco"
+      },
+      {
+        "model": "pasillos:block/saco",
+        "y": 90
+      },
+      {
+        "model": "pasillos:block/saco",
+        "y": 180
+      },
+      {
+        "model": "pasillos:block/saco",
+        "y": 270
+      }
+    ]
+  }
+}

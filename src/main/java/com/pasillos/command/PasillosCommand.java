@@ -4,7 +4,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.pasillos.DreamTravel;
 import com.pasillos.PasillosMod;
 import com.pasillos.entity.Asechador;
+import com.pasillos.registry.ModBlocks;
 import com.pasillos.registry.ModEntities;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -19,6 +22,7 @@ import net.minecraftforge.fml.common.Mod;
  * /pasillos asechador -> aparece un Asechador a unos 18 bloques
  * /pasillos entrar  -> te manda al Nivel 0
  * /pasillos volver  -> te saca del Nivel 0
+ * /pasillos saco    -> coloca un saco delante de ti
  * /pasillos noche   -> pone la noche en el mundo (para probar la niebla)
  * /pasillos dia     -> pone el dia
  */
@@ -57,6 +61,18 @@ public final class PasillosCommand {
                     }
                     stalker.moveTo(x + 0.5D, y, z + 0.5D, 0.0F, 0.0F);
                     level.addFreshEntity(stalker);
+                    return 1;
+                }))
+                .then(Commands.literal("saco").executes(ctx -> {
+                    ServerPlayer player = ctx.getSource().getPlayerOrException();
+                    ServerLevel level = player.serverLevel();
+                    BlockPos pos = BlockPos.containing(player.position().add(player.getLookAngle().multiply(2.0D, 0.0D, 2.0D)));
+                    BlockState state = ModBlocks.SACK.get().defaultBlockState();
+                    if (!level.getBlockState(pos).isAir() || !state.canSurvive(level, pos)) {
+                        ctx.getSource().sendFailure(Component.translatable("message.pasillos.no_space"));
+                        return 0;
+                    }
+                    level.setBlock(pos, state, 3);
                     return 1;
                 }))
                 .then(Commands.literal("noche").executes(ctx -> {

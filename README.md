@@ -9,8 +9,12 @@ Mod de terror para Minecraft Forge 1.20.1.
 - **Barras de Cordura y Ansiedad** (arriba a la izquierda, solo dentro de la dimensión; empiezan al entrar):
   - La **cordura** baja con la oscuridad de la noche, con el Asechador cerca y, mucho más, al verlo. Se recupera de día, o de noche si estás junto a una luz de bloque (antorcha, farol, glowstone...: nivel de luz 8 o más) y sin Asechador cerca.
   - La **ansiedad** sube con la noche (menos si estás a la luz), el Asechador cerca y la poca cordura; baja despacio. Por encima de 45 oyes latidos cada vez más rápidos y aparece un borde rojo que pulsa; por encima de 40 la cámara tiembla. Con la cordura por debajo de 45 se oyen sonidos que no existen.
+  - **Si te mira** (te ve con línea de visión a menos de 48 bloques), la cordura baja y la ansiedad sube más rápido, y el icono de cordura late en rojo.
+  - Cuando hay uno merodeando sale el mensaje *"Hay una presencia extraña al alrededor..."*, con un sonido grave (cada 2 a 3 minutos como mucho).
+  - Las barras muestran icono, estado (Estable / Inquieta / Frágil / Quebrada; Calma / Tensa / Alta / Pánico), porcentaje, flecha de tendencia, estela de lo perdido, marcas en 25/50/75 y destellos al curarte o herirte.
+- **Sancor y Anx:** *Sancor* es una bebida (+45 cordura, −12 ansiedad, devuelve la botella vacía, espera de 5 s). *Anx* son pastillas (−38 ansiedad, +6 cordura, dan algo de lentitud 6 s, espera de 3 s). Aparecen en *Saco pequeño*, que hay muy de vez en cuando junto a algún árbol (1 de cada ~28 árboles): clic derecho para abrirlo.
 - **Niebla nocturna:** de noche el mundo se oscurece y la niebla se cierra a unos 30 bloques, se vuelve casi negra y avanza y retrocede. Las siluetas lejanas siguen viéndose dentro de ella. Se ajusta en `distancia_noche`.
-- **El Asechador (Stalker):** una silueta negra y descarnada de unos 3,8 bloques. Cuello largo, cabeza ovalada ladeada con dos cuernos finos, ojos blancos con pupila de rendija, mandíbula que cuelga entreabierta con colmillos, columna y costillas marcadas, brazos que cuelgan hasta las rodillas y terminan en tres dedos larguísimos de hueso. Echa ceniza y tinta negra. Nunca ataca.
+- **El Asechador (Stalker):** una silueta negra y descarnada de unos 3,8 bloques. Cuello largo, cabeza ovalada ladeada y sin cuernos, ojos blancos con pupila de rendija, mandíbula que cuelga entreabierta con colmillos, columna y costillas marcadas, brazos que cuelgan hasta las rodillas y terminan en tres dedos larguísimos de hueso. Echa ceniza y tinta negra. Nunca ataca.
   - Animaciones: respira, la cabeza se ladea de golpe en tics, la mandíbula se abre y se cierra, camina con zancada rígida, se agazapa y se asoma con una mano apoyada.
   - Lo hace aparecer el "director" de noche, a 36-44 bloques, como mucho uno por jugador, y siempre tras una pausa. Se disuelve al amanecer.
   - Se mantiene a **22-42 bloques** de ti, siempre con la cabeza girada hacia ti, y cambia de escondite cada 10-25 segundos con uno de tres estilos:
@@ -35,6 +39,7 @@ Si prefieres compilar en tu PC: JDK 17, MDK de Forge 1.20.1, copia `build.gradle
 | `/pasillos entrar` | Te manda a la dimensión |
 | `/pasillos volver` | Te saca de la dimensión |
 | `/pasillos asechador` | Aparece un Asechador a unos 18 bloques |
+| `/pasillos saco` | Coloca un saco delante de ti |
 | `/pasillos noche` | Pone la noche (para ver la niebla y al Asechador) |
 | `/pasillos dia` | Pone el día |
 
@@ -51,6 +56,7 @@ También hay un huevo generador del Asechador en la pestaña de huevos del modo 
 - `entity/Asechador.java`: el mob, sus estados y partículas. `entity/HideAndWatchGoal.java`: su comportamiento y los estilos de escondite. `event/AsechadorDirector.java`: cuándo y dónde aparece.
 - `client/AsechadorModel.java` y `AsechadorRenderer.java`: el modelo 3D, las animaciones y los ojos brillantes.
 - `client/SanityState.java` y `SanityHandler.java`: cordura, ansiedad y sus efectos. `client/HudOverlays.java`: barras y oscuridad nocturna. `client/FogHandler.java`: la niebla.
+- `item/`, `block/SackBlock.java`, `network/`: Sancor, Anx, el saco y el paquete que cambia la cordura desde el servidor. El botín del saco está en `data/pasillos/loot_tables/blocks/saco.json`.
 - `DreamTravel.java` y `event/SleepHandler.java`: entrar y salir al dormir.
 - `data/pasillos/...`: dimensión, tipo de dimensión, bioma y receta en JSON.
 

@@ -6,5 +6,20 @@
   "message.pasillos.no_dimension": "La dimensión no está disponible.",
   "message.pasillos.not_inside": "No estás en el mundo olvidado.",
   "hud.pasillos.sanity": "Cordura",
-  "hud.pasillos.anxiety": "Ansiedad"
+  "hud.pasillos.anxiety": "Ansiedad",
+  "block.pasillos.saco": "Saco pequeño",
+  "item.pasillos.sancor": "Sancor",
+  "item.pasillos.sancor.desc": "Una bebida tibia que devuelve la cordura.",
+  "item.pasillos.anx": "Anx",
+  "item.pasillos.anx.desc": "Pastillas que calman la ansiedad. Dan algo de sueño.",
+  "message.pasillos.presence": "Hay una presencia extraña al alrededor...",
+  "hud.pasillos.sanity.state.0": "Estable",
+  "hud.pasillos.sanity.state.1": "Inquieta",
+  "hud.pasillos.sanity.state.2": "Frágil",
+  "hud.pasillos.sanity.state.3": "Quebrada",
+  "hud.pasillos.anxiety.state.0": "Calma",
+  "hud.pasillos.anxiety.state.1": "Tensa",
+  "hud.pasillos.anxiety.state.2": "Alta",
+  "hud.pasillos.anxiety.state.3": "Pánico",
+  "message.pasillos.no_space": "No hay sitio para el saco."
 }

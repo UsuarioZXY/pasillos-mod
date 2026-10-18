@@ -98,7 +98,7 @@ public class HideAndWatchGoal extends Goal {
                 return;
             }
             this.mob.getNavigation().stop();
-            this.mob.setState(Asechador.STATE_WATCH);
+            this.mob.setState(Asechador.STATE_STARE);
             return;
         }
         if (this.seenTicks > 0) {
