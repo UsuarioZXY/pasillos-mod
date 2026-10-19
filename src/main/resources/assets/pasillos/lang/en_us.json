@@ -39,5 +39,8 @@
   "hud.pasillos.noise.state.1": "Bajo",
   "hud.pasillos.noise.state.2": "Medio",
   "hud.pasillos.noise.state.3": "Alto",
-  "thought.pasillos.noise": "Hice demasiado ruido... me oyó."
+  "thought.pasillos.noise": "Hice demasiado ruido... me oyó.",
+  "entity.pasillos.ciego": "Ciego",
+  "item.pasillos.ciego_spawn_egg": "Huevo generador de Ciego",
+  "thought.pasillos.dog": "Algo gruñe en la oscuridad... y no tiene ojos."
 }

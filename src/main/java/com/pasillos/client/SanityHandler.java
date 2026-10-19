@@ -51,6 +51,7 @@ public final class SanityHandler {
     private static int presenceCooldown;
     private static int panicTicks;
     private static int noiseThoughtCooldown;
+    private static int dogThoughtCooldown;
     private static int hallucinationTimer;
     private static int thoughtTimer;
     private static int nextFakeId = -3_000_000;
@@ -126,6 +127,22 @@ public final class SanityHandler {
             }
         }
         boolean stalkerNear = nearest < 64.0D;
+
+        // --- el Ciego (perro sin ojos): cuanto mas cerca, mas miedo; mucho mas si te esta cazando ---
+        float dogK = 0.0F;
+        boolean dogHunting = false;
+        for (com.pasillos.entity.Ciego dog : level.getEntitiesOfClass(com.pasillos.entity.Ciego.class,
+                player.getBoundingBox().inflate(32.0D))) {
+            dogK = Math.max(dogK, (float) (1.0D - dog.distanceTo(player) / 32.0D));
+            dogHunting |= dog.isHunting();
+        }
+        if (dogThoughtCooldown > 0) {
+            dogThoughtCooldown--;
+        }
+        if (dogK > 0.0F && dogThoughtCooldown <= 0) {
+            SanityState.say("thought.pasillos.dog");
+            dogThoughtCooldown = 3000;
+        }
         SanityState.watched = watched;
         SanityState.seen = seen;
         float nearK = stalkerNear ? (float) (1.0D - Math.min(nearest, 48.0D) / 48.0D) : 0.0F;
@@ -162,6 +179,7 @@ public final class SanityHandler {
         if (!darkness && !stalkerNear) {
             delta += night < 0.2F ? 0.03F : 0.015F;
         }
+        delta -= 0.015F * dogK * (dogHunting ? 2.5F : 1.0F);
         SanityState.sanity = Mth.clamp(SanityState.sanity + delta, 0.0F, 100.0F);
 
         // hacer ruido con el Asechador cerca te pone nervioso
@@ -186,6 +204,7 @@ public final class SanityHandler {
         if (stalkerNear) {
             target += SanityState.noiseShown * 0.3F * nearK2(nearest);
         }
+        target += 35.0F * dogK * (dogHunting ? 1.5F : 1.0F);
         target = Mth.clamp(target, 0.0F, 100.0F);
         float rate = target > SanityState.anxiety ? (watched ? 0.05F : 0.03F) : 0.01F;
         SanityState.anxiety = Mth.clamp(SanityState.anxiety + (target - SanityState.anxiety) * rate, 0.0F, 100.0F);

@@ -13,11 +13,13 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void onRegisterLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(AsechadorModel.LAYER, AsechadorModel::createBodyLayer);
+        event.registerLayerDefinition(CiegoModel.LAYER, CiegoModel::createBodyLayer);
     }
 
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.ASECHADOR.get(), AsechadorRenderer::new);
+        event.registerEntityRenderer(ModEntities.CIEGO.get(), CiegoRenderer::new);
     }
 
     private ClientModEvents() {

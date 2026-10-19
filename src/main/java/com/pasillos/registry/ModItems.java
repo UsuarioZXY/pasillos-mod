@@ -18,6 +18,9 @@ public final class ModItems {
     public static final RegistryObject<Item> ASECHADOR_SPAWN_EGG = ITEMS.register("asechador_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.ASECHADOR, 0x0B0B0B, 0xE8E8E8, new Item.Properties()));
 
+    public static final RegistryObject<Item> CIEGO_SPAWN_EGG = ITEMS.register("ciego_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.CIEGO, 0x9A948C, 0x3A0D0D, new Item.Properties()));
+
     /** Bebida que devuelve cordura. */
     public static final RegistryObject<Item> SANCOR = ITEMS.register("sancor",
             () -> new SancorItem(new Item.Properties()));

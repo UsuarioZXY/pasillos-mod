@@ -13,6 +13,8 @@ Mod de terror para Minecraft Forge 1.20.1.
   - Cuando hay uno merodeando sale el mensaje *"Hay una presencia extraña al alrededor..."*, con un sonido grave (cada 2 a 3 minutos como mucho).
   - Las barras muestran icono, estado (Estable / Inquieta / Frágil / Quebrada; Calma / Tensa / Alta / Pánico), porcentaje, flecha de tendencia, estela de lo perdido, marcas en 25/50/75 y destellos al curarte o herirte.
 - **Sancor y Anx:** *Sancor* es una bebida (+45 cordura, −12 ansiedad, devuelve la botella vacía, espera de 5 s). *Anx* son pastillas (−38 ansiedad, +6 cordura, dan algo de lentitud 6 s, espera de 3 s). Aparecen en *Saco pequeño*, que hay muy de vez en cuando junto a algún árbol (1 de cada ~28 árboles): clic derecho para abrirlo.
+- **El Ciego:** una criatura delgada, de piel gris y costillas marcadas, **sin ojos** (los tiene cosidos), con hocico largo de colmillos, patas de más y cola de rata. Anda a cuatro patas y algo parece un perro, pero no lo es. **No ve: te caza por el ruido** (te oye a 1,3 × tu nivel de ruido, y siempre a menos de 3 bloques). Va hacia el último ruido que oyó, corre si fue muy fuerte, muerde fuerte (6 de daño) si te alcanza y, si te quedas en silencio o agachado, pierde el rastro y se pone a olfatear. Aparece atraído por el ruido alto sostenido (unos 8 segundos) y, en el Nivel -1, de vez en cuando solo; uno por jugador y con pausas largas. Con él cerca sube la ansiedad y baja la cordura.
+- **Vagonetas con cofre:** en los túneles del Nivel -1 hay, de vez en cuando, una vagoneta con cofre sobre un trocito de vía, con antorchas, carbón, pastillas Anx y con suerte Sancor.
 - **Cuando la mente se rompe:**
   - Con la **ansiedad al 100 %** (pánico), cada segundo sube la probabilidad de un **ataque al corazón**: un golpe fuerte (nunca te mata, te deja con medio corazón como mínimo), ceguera, náuseas, lentitud y debilidad. Después la ansiedad baja a la mitad y la cordura cae 20. Se ajusta en `ataque_corazon_por_segundo` (0 lo desactiva).
   - Con **cordura baja (< 35)** ves **alucinaciones**: un Asechador falso a tu espalda que desaparece al mirarlo, pero te asusta igualmente (ansiedad +9, cordura −3). Si hay uno real cerca y tu cordura es baja (< 30), te afecta un 40 % más.
@@ -20,7 +22,7 @@ Mod de terror para Minecraft Forge 1.20.1.
 - **Nivel -1:** si **bajas hasta el fondo del Overworld** (Y -60 por defecto) o te cavas hasta el suelo de bedrock del Nivel 0, caes a una **red de túneles de piedra**: estrechos y altos, que se cruzan, se ramifican, tienen callejones sin salida y alguna sala pequeña. No hay mobs normales y está a oscuras (sin niebla, solo oscuridad: lleva antorchas). Al llegar oyes tus pensamientos: "¿Dónde estoy?...". El Asechador sigue ahí, escondiéndose en los cruces y las paredes. La red llega a **140 bloques de radio**; cámbialo en `radio_cueva` (solo afecta a chunks nuevos). Para salir: duerme en una cama dentro (siempre es "de noche"), o `/pasillos volver`.
 - **Ruido:** en los dos niveles hay un medidor de **Ruido** debajo de las barras. Caminar hace ruido medio, **correr mucho**, saltar y caer también, **romper un bloque** es lo más ruidoso y poner uno bastante; **agacharte** casi no hace ruido. El Asechador te oye a unos 0,9 × ruido bloques: se pone en alerta y se acerca (a 14-30 bloques en vez de 22-42), con ruido sostenido aparece antes y más cerca, y hacer ruido con él cerca te sube la ansiedad.
 - **Niebla nocturna:** de noche el mundo se oscurece y la niebla se cierra a unos 30 bloques, se vuelve casi negra y avanza y retrocede. Las siluetas lejanas siguen viéndose dentro de ella. Se ajusta en `distancia_noche`.
-- **El Asechador (Stalker):** una silueta negra y descarnada de unos 3,8 bloques. Cuello largo, cabeza ovalada ladeada y sin cuernos, ojos blancos con pupila de rendija, mandíbula que cuelga entreabierta con colmillos, columna y costillas marcadas, brazos que cuelgan hasta las rodillas y terminan en tres dedos larguísimos de hueso. Echa ceniza y tinta negra. Nunca ataca.
+- **El Asechador (Stalker):** una silueta negra y descarnada de unos 3,8 bloques. Cuello largo, cabeza ovalada ladeada, sin cuernos y con la espalda lisa (sin alas ni jirones), ojos blancos con pupila de rendija, mandíbula que cuelga entreabierta con colmillos, columna y costillas marcadas, brazos que cuelgan hasta las rodillas y terminan en tres dedos larguísimos de hueso. Echa ceniza y tinta negra. Nunca ataca.
   - Animaciones: respira, la cabeza se ladea de golpe en tics, la mandíbula se abre y se cierra, camina con zancada rígida, se agazapa y se asoma con una mano apoyada.
   - Lo hace aparecer el "director" de noche, a 36-44 bloques, como mucho uno por jugador, y siempre tras una pausa. Se disuelve al amanecer.
   - Se mantiene a **22-42 bloques** de ti, siempre con la cabeza girada hacia ti, y cambia de escondite cada 10-25 segundos con uno de tres estilos:
@@ -45,6 +47,7 @@ Si prefieres compilar en tu PC: JDK 17, MDK de Forge 1.20.1, copia `build.gradle
 | `/pasillos entrar` | Te manda a la dimensión |
 | `/pasillos profundo` | Te manda al Nivel -1 |
 | `/pasillos volver` | Te saca de la dimensión |
+| `/pasillos ciego` | Aparece un Ciego a 26-40 bloques |
 | `/pasillos asechador` | Aparece un Asechador a unos 18 bloques |
 | `/pasillos saco` | Coloca un saco delante de ti |
 | `/pasillos noche` | Pone la noche (para ver la niebla y al Asechador) |
@@ -65,6 +68,7 @@ También hay un huevo generador del Asechador en la pestaña de huevos del modo 
 - `client/SanityState.java` y `SanityHandler.java`: cordura, ansiedad y sus efectos. `client/HudOverlays.java`: barras y oscuridad nocturna. `client/FogHandler.java`: la niebla.
 - `item/`, `block/SackBlock.java`, `network/`: Sancor, Anx, el saco y el paquete que cambia la cordura desde el servidor. El botín del saco está en `data/pasillos/loot_tables/blocks/saco.json`.
 - `worldgen/CaveShape.java` y `CaveChunkGenerator.java`: los túneles del Nivel -1. `event/NoiseSystem.java`: el ruido. `event/DepthHandler.java`: la caída. `event/PanicHandler.java` y `network/PanicMessage.java`: ataques al corazón y mareos.
+- `entity/Ciego.java` y `ListenAndHuntGoal.java`: el perro ciego; `client/CiegoModel.java`: su modelo; `event/CiegoDirector.java`: cuándo aparece. `event/MinecartSpawner.java`: vagonetas con cofre.
 - `DreamTravel.java` y `event/SleepHandler.java`: entrar y salir al dormir.
 - `data/pasillos/...`: dimensión, tipo de dimensión, bioma y receta en JSON.
 

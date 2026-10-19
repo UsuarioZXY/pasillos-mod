@@ -23,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
  * /pasillos entrar  -> te manda al Nivel 0
  * /pasillos profundo -> te manda al Nivel -1 (la cueva)
  * /pasillos volver  -> te saca del Nivel 0
+ * /pasillos ciego   -> aparece un Ciego a 26-40 bloques
  * /pasillos saco    -> coloca un saco delante de ti
  * /pasillos noche   -> pone la noche en el mundo (para probar la niebla)
  * /pasillos dia     -> pone el dia
@@ -67,6 +68,14 @@ public final class PasillosCommand {
                     }
                     stalker.moveTo(x + 0.5D, y, z + 0.5D, 0.0F, 0.0F);
                     level.addFreshEntity(stalker);
+                    return 1;
+                }))
+                .then(Commands.literal("ciego").executes(ctx -> {
+                    ServerPlayer player = ctx.getSource().getPlayerOrException();
+                    if (!com.pasillos.event.CiegoDirector.trySpawn(player.serverLevel(), player)) {
+                        ctx.getSource().sendFailure(Component.translatable("message.pasillos.no_space"));
+                        return 0;
+                    }
                     return 1;
                 }))
                 .then(Commands.literal("saco").executes(ctx -> {

@@ -2,6 +2,7 @@ package com.pasillos.event;
 
 import com.pasillos.PasillosMod;
 import com.pasillos.entity.Asechador;
+import com.pasillos.entity.Ciego;
 import com.pasillos.registry.ModEntities;
 import com.pasillos.registry.ModItems;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -19,6 +20,7 @@ public final class ModEvents {
     @SubscribeEvent
     public static void onAttributes(EntityAttributeCreationEvent event) {
         event.put(ModEntities.ASECHADOR.get(), Asechador.createAttributes().build());
+        event.put(ModEntities.CIEGO.get(), Ciego.createAttributes().build());
     }
 
     @SubscribeEvent
@@ -32,6 +34,7 @@ public final class ModEvents {
     public static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(ModItems.ASECHADOR_SPAWN_EGG);
+            event.accept(ModItems.CIEGO_SPAWN_EGG);
         }
         if (event.getTabKey() == CreativeModeTabs.FOOD_AND_DRINKS) {
             event.accept(ModItems.SANCOR);

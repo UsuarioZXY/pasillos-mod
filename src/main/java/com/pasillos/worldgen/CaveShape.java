@@ -173,6 +173,25 @@ public final class CaveShape {
         return new BlockPos(0, 60, 0);
     }
 
+    /** Donde va la vagoneta con cofre de este chunk (o null si no toca / no hay hueco). */
+    public static BlockPos cartSpot(int chunkX, int chunkZ) {
+        if (Math.floorMod(hash(chunkX, chunkZ, 501), 14) != 0) {
+            return null;
+        }
+        int radius = radius();
+        for (int i = 0; i < 12; i++) {
+            int x = chunkX * 16 + 1 + Math.floorMod(hash(chunkX, chunkZ, 510 + i), 14);
+            int z = chunkZ * 16 + 1 + Math.floorMod(hash(chunkX, chunkZ, 540 + i), 14);
+            int[] col = column(radius, x, z);
+            int[] east = column(radius, x + 1, z);
+            int[] west = column(radius, x - 1, z);
+            if (col != null && east != null && west != null && col[1] - col[0] >= 6) {
+                return new BlockPos(x, col[0] + 1, z);
+            }
+        }
+        return null;
+    }
+
     private CaveShape() {
     }
 }

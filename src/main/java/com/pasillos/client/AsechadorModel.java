@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
 /**
  * Silueta altisima (unos 3,9 bloques) y descarnada, sin cuernos: cuello largo que se estira hacia
  * delante, craneo ovalado ladeado, mandibula que cuelga con colmillos, torso estrecho con columna y
- * costillas, jirones de tela rota en la espalda y brazos que cuelgan hasta casi tocar el suelo.
+ * costillas, la espalda lisa, sin alas ni jirones, y brazos que cuelgan hasta casi tocar el suelo.
  * Los brazos tienen hombro, codo y muneca, y cada mano tiene tres dedos de hueso que se curvan por
  * separado. Las piernas tienen rodilla.
  *
@@ -29,7 +29,7 @@ import net.minecraft.util.Mth;
  * Animaciones (todas se mezclan segun cuanto vale cada pose, de 0 a 1, asi no hay saltos):
  *  - Reposo: respiracion, balanceo lento, brazos como pendulos con retraso, dedos que se mueven solos,
  *    tics bruscos de la cabeza y mandibula que se entreabre y tiembla.
- *  - Caminar: zancada con rodilla y cadera torcida, a tirones; brazos con codo; jirones que ondean.
+ *  - Caminar: zancada con rodilla y cadera torcida, a tirones; brazos con codo.
  *  - Agazaparse: cadera baja, muslos adelante y piernas dobladas, torso inclinado, manos en el suelo.
  *  - Asomarse: torso ladeado, cuello estirado por un costado, una mano agarrando la cobertura.
  *  - Pillado (STARE): se endereza de golpe, boca muy abierta, manos abiertas y todo el cuerpo tiembla.
@@ -46,8 +46,6 @@ public class AsechadorModel extends EntityModel<Asechador> {
     private final ModelPart neck;
     private final ModelPart head;
     private final ModelPart jaw;
-    private final ModelPart ragLeft;
-    private final ModelPart ragRight;
     private final ModelPart[] arm = new ModelPart[2];
     private final ModelPart[] forearm = new ModelPart[2];
     private final ModelPart[] hand = new ModelPart[2];
@@ -61,8 +59,6 @@ public class AsechadorModel extends EntityModel<Asechador> {
         this.neck = this.body.getChild("neck");
         this.head = this.neck.getChild("head");
         this.jaw = this.head.getChild("jaw");
-        this.ragLeft = this.body.getChild("rag_left");
-        this.ragRight = this.body.getChild("rag_right");
         for (int i = 0; i < 2; i++) {
             String side = i == 0 ? "right" : "left";
             this.arm[i] = this.body.getChild(side + "_arm");
@@ -80,12 +76,9 @@ public class AsechadorModel extends EntityModel<Asechador> {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
 
-        // torso estrecho de 21 de alto con tres vertebras que sobresalen en la espalda; pivote en la cadera
+        // torso estrecho de 21 de alto liso por la espalda; pivote en la cadera
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create()
-                        .texOffs(0, 24).addBox(-4.0F, -21.0F, -2.0F, 8.0F, 21.0F, 4.0F)
-                        .texOffs(112, 0).addBox(-1.0F, -18.0F, 2.0F, 2.0F, 3.0F, 2.0F)
-                        .texOffs(112, 0).addBox(-1.0F, -12.0F, 2.0F, 2.0F, 3.0F, 2.0F)
-                        .texOffs(112, 0).addBox(-1.0F, -6.0F, 2.0F, 2.0F, 3.0F, 2.0F),
+                        .texOffs(0, 24).addBox(-4.0F, -21.0F, -2.0F, 8.0F, 21.0F, 4.0F),
                 PartPose.ZERO);
 
         // cuello largo (pivote en lo alto del torso) y encima la cabeza
@@ -103,14 +96,6 @@ public class AsechadorModel extends EntityModel<Asechador> {
         head.addOrReplaceChild("jaw", CubeListBuilder.create()
                         .texOffs(64, 0).addBox(-3.0F, 0.0F, -7.0F, 6.0F, 4.0F, 6.0F),
                 PartPose.offset(0.0F, -3.0F, 3.0F));
-
-        // jirones de tela rota que cuelgan de los hombros por la espalda
-        body.addOrReplaceChild("rag_left", CubeListBuilder.create()
-                        .texOffs(120, 0).addBox(-1.5F, 0.0F, 0.0F, 3.0F, 20.0F, 1.0F),
-                PartPose.offset(2.6F, -19.0F, 2.3F));
-        body.addOrReplaceChild("rag_right", CubeListBuilder.create()
-                        .texOffs(120, 0).addBox(-1.5F, 0.0F, 0.0F, 3.0F, 20.0F, 1.0F),
-                PartPose.offset(-2.6F, -19.0F, 2.3F));
 
         // brazos: hombro (15) > codo (16) > muneca (2) > tres dedos de 8; en total 41, casi hasta el suelo
         for (int i = 0; i < 2; i++) {
@@ -211,13 +196,6 @@ public class AsechadorModel extends EntityModel<Asechador> {
                 + peek * (0.35F + Mth.sin(t * 1.8F) * 0.03F)
                 + crouch * 0.20F
                 + stare * (0.75F + Mth.sin(t * 2.9F) * 0.06F);
-
-        // ---------------------------------------------------------------- jirones de tela
-        float flutter = limbSwingAmount * 0.45F + crouch * 0.5F;
-        this.ragLeft.xRot = 0.06F + flutter + Mth.sin(t * 0.07F) * 0.07F;
-        this.ragRight.xRot = 0.06F + flutter + Mth.sin(t * 0.07F + 1.3F) * 0.07F;
-        this.ragLeft.zRot = Mth.sin(t * 0.05F + 0.7F) * 0.05F;
-        this.ragRight.zRot = Mth.sin(t * 0.05F + 2.1F) * 0.05F;
 
         // ---------------------------------------------------------------- brazos y dedos
         // el brazo del lado hacia el que se inclina es el que agarra la cobertura
