@@ -85,7 +85,7 @@ public class Ciego extends Monster {
     }
 
     @Override
-    protected float getVoicePitch() {
+    public float getVoicePitch() {
         return 0.55F + this.random.nextFloat() * 0.15F;
     }
 
